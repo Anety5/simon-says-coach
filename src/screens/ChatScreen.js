@@ -1,0 +1,690 @@
+// Chat Screen - Where coaching happens
+import React, { useState, useEffect, useRef } from 'react';
+import { View, StyleSheet, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Text } from '../components';
+import { colors, spacing, layout, typography } from '../config/theme';
+import { generateCoachResponse, getRandomQuote } from '../utils/gemini';
+import { getCurrentUser } from '../utils/auth';
+import { getUserProfile, createConversation, addMessage, getMessages } from '../utils/firestore';
+import { checkProStatus } from '../utils/purchases';
+import { speakText, stopSpeaking, startListening, stopListening, isVoiceAvailable } from '../utils/voice';
+
+export default function ChatScreen({ navigation, route }) {
+  const coachType = route?.params?.coachType || 'productivity';
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      role: 'coach',
+      text: 'Hello! I\'m your Productivity Coach. I\'m here to help you manage your time, tasks, and energy more effectively. What would you like to work on today?',
+      timestamp: new Date()
+    }
+  ]);
+  const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [quote, setQuote] = useState('');
+  const [userProfile, setUserProfile] = useState(null);
+  const [conversationId, setConversationId] = useState(null);
+  const [isLoadingConversation, setIsLoadingConversation] = useState(true);
+  const [messageCount, setMessageCount] = useState(0);
+  const [isPro, setIsPro] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const scrollViewRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    setQuote(getRandomQuote());
+    loadUserProfile();
+    loadOrCreateConversation();
+    checkSubscription();
+    loadMessageCount();
+    checkVoiceAvailability();
+  }, []);
+
+  useEffect(() => {
+    // Auto-scroll to bottom when messages change
+    if (scrollViewRef.current) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+    
+    // Auto-play coach responses if voice is enabled
+    if (voiceEnabled && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'coach' && !isLoading) {
+        handleSpeakMessage(lastMessage.text);
+      }
+    }
+  }, [messages, voiceEnabled]);
+
+  const checkVoiceAvailability = () => {
+    const voiceStatus = isVoiceAvailable();
+    console.log('Voice capabilities:', voiceStatus);
+  };
+
+  const checkSubscription = async () => {
+    const proStatus = await checkProStatus();
+    setIsPro(proStatus);
+  };
+
+  const loadMessageCount = async () => {
+    try {
+      const today = new Date().toDateString();
+      const stored = await AsyncStorage.getItem('messageCount');
+      if (stored) {
+        const { date, count } = JSON.parse(stored);
+        if (date === today) {
+          setMessageCount(count);
+        } else {
+          // New day, reset count
+          setMessageCount(0);
+          await AsyncStorage.setItem('messageCount', JSON.stringify({ date: today, count: 0 }));
+        }
+      }
+    } catch (error) {
+      console.error('Error loading message count:', error);
+    }
+  };
+
+  const incrementMessageCount = async () => {
+    const today = new Date().toDateString();
+    const newCount = messageCount + 1;
+    setMessageCount(newCount);
+    await AsyncStorage.setItem('messageCount', JSON.stringify({ date: today, count: newCount }));
+  };
+
+  const loadUserProfile = async () => {
+    try {
+      const user = getCurrentUser();
+      if (user) {
+        const profile = await getUserProfile(user.uid);
+        console.log('User profile loaded:', profile);
+        setUserProfile(profile);
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    }
+  };
+
+  const loadOrCreateConversation = async () => {
+    try {
+      const user = getCurrentUser();
+      if (!user) {
+        console.error('No user found');
+        setIsLoadingConversation(false);
+        return;
+      }
+
+      // Check if we're resuming an existing conversation
+      const params = route?.params || {};
+      if (params.conversationId && params.resuming) {
+        setConversationId(params.conversationId);
+        console.log('Resuming conversation:', params.conversationId);
+        
+        // Load existing messages from this conversation
+        const existingMessages = await getMessages(params.conversationId);
+        
+        if (existingMessages.length > 0) {
+          // Convert Firestore messages to our format
+          const formattedMessages = existingMessages.map((msg, index) => ({
+            id: index + 1,
+            role: msg.role,
+            text: msg.text,
+            timestamp: msg.timestamp?.toDate() || new Date()
+          }));
+          setMessages(formattedMessages);
+          console.log(`Loaded ${formattedMessages.length} messages from Firestore`);
+        }
+      } else {
+        // Create a new conversation for this coach
+        const convId = await createConversation(user.uid, coachType);
+        setConversationId(convId);
+        console.log('Conversation created:', convId);
+      }
+
+      setIsLoadingConversation(false);
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+      setIsLoadingConversation(false);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!inputText.trim() || isLoading) return;
+
+    // Check message limit for free tier
+    if (!isPro && messageCount >= 20) {
+      alert('💡 Daily limit reached (20 messages). Upgrade to Pro for unlimited messaging!');
+      return;
+    }
+
+    const userInput = inputText.trim();
+    setInputText('');
+    setIsLoading(true);
+
+    // Increment message count
+    await incrementMessageCount();
+
+    // Add user message
+    const userMessage = {
+      id: messages.length + 1,
+      role: 'user',
+      text: userInput,
+      timestamp: new Date()
+    };
+
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+
+    // Save user message to Firestore
+    if (conversationId) {
+      try {
+        await addMessage(conversationId, {
+          role: 'user',
+          text: userInput,
+          timestamp: new Date()
+        });
+      } catch (error) {
+        console.error('Error saving user message:', error);
+      }
+    }
+
+    try {
+      // Get AI response from Gemini with user context
+      const response = await generateCoachResponse(coachType, updatedMessages, userProfile);
+      
+      // Add coach response
+      const coachMessage = {
+        id: updatedMessages.length + 1,
+        role: 'coach',
+        text: response,
+        timestamp: new Date()
+      };
+      
+      setMessages([...updatedMessages, coachMessage]);
+
+      // Save coach message to Firestore
+      if (conversationId) {
+        try {
+          await addMessage(conversationId, {
+            role: 'coach',
+            text: response,
+            timestamp: new Date()
+          });
+        } catch (error) {
+          console.error('Error saving coach message:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error getting coach response:', error);
+      
+      // Fallback message
+      const errorMessage = {
+        id: updatedMessages.length + 1,
+        role: 'coach',
+        text: 'I apologize, I\'m having trouble responding right now. Please try again.',
+        timestamp: new Date()
+      };
+      
+      setMessages([...updatedMessages, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSpeakMessage = async (text) => {
+    if (!isPro) return; // Voice is Pro feature
+    
+    try {
+      setIsSpeaking(true);
+      await speakText(text);
+      setIsSpeaking(false);
+    } catch (error) {
+      console.error('Error speaking message:', error);
+      setIsSpeaking(false);
+    }
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Convert image to base64
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Image = reader.result.split(',')[1]; // Remove data:image/...;base64, prefix
+      setSelectedImage(base64Image);
+      
+      // Add user message with image indicator
+      const userMessage = {
+        id: messages.length + 1,
+        role: 'user',
+        text: inputText.trim() || '📷 [Image uploaded]',
+        image: base64Image,
+        timestamp: new Date()
+      };
+      
+      const updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
+      setInputText('');
+      setSelectedImage(null);
+      setIsLoading(true);
+
+      // Save user message
+      if (conversationId) {
+        try {
+          await addMessage(conversationId, {
+            role: 'user',
+            text: userMessage.text,
+            timestamp: new Date()
+          });
+        } catch (error) {
+          console.error('Error saving user message:', error);
+        }
+      }
+
+      try {
+        // Get AI response with image
+        const response = await generateCoachResponse(coachType, updatedMessages, userProfile, base64Image);
+        
+        const coachMessage = {
+          id: updatedMessages.length + 1,
+          role: 'coach',
+          text: response,
+          timestamp: new Date()
+        };
+        
+        setMessages([...updatedMessages, coachMessage]);
+        setIsLoading(false);
+
+        // Save coach response
+        if (conversationId) {
+          try {
+            await addMessage(conversationId, {
+              role: 'coach',
+              text: response,
+              timestamp: new Date()
+            });
+          } catch (error) {
+            console.error('Error saving coach message:', error);
+          }
+        }
+
+        // Speak response if voice enabled
+        if (voiceEnabled && isPro) {
+          await speakText(response);
+        }
+
+        // Increment message count for free tier
+        if (!isPro) {
+          const newCount = messageCount + 1;
+          setMessageCount(newCount);
+          await AsyncStorage.setItem('messageCount', newCount.toString());
+        }
+      } catch (error) {
+        console.error('Error getting AI response:', error);
+        setIsLoading(false);
+      }
+    };
+    
+    reader.readAsDataURL(file);
+  };
+
+  const handleToggleVoice = () => {
+    if (!isPro) {
+      alert('🎙️ Voice responses are a Pro feature! Upgrade to hear your coach speak.');
+      navigation.navigate('paywall');
+      return;
+    }
+    
+    if (voiceEnabled && isSpeaking) {
+      stopSpeaking();
+      setIsSpeaking(false);
+    }
+    setVoiceEnabled(!voiceEnabled);
+  };
+
+  const handleStartListening = () => {
+    if (isListening) {
+      stopListening(recognitionRef.current);
+      setIsListening(false);
+      return;
+    }
+    
+    const recognition = startListening(
+      (transcript, isFinal) => {
+        setInputText(transcript);
+        if (isFinal) {
+          setIsListening(false);
+        }
+      },
+      (error) => {
+        console.error('Speech recognition error:', error);
+        setIsListening(false);
+        alert('Could not recognize speech. Please try again.');
+      }
+    );
+    
+    if (recognition) {
+      recognitionRef.current = recognition;
+      setIsListening(true);
+    } else {
+      alert('Speech recognition not available on this device.');
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      {/* Inspirational Quote Header */}
+      <View style={styles.quoteContainer}>
+        <View style={styles.quoteRow}>
+          <Text variant="small" style={styles.quote}>
+            "{quote}"
+          </Text>
+          {!isPro && (
+            <Text variant="tiny" color={colors.textTertiary} style={styles.messageCounter}>
+              {messageCount}/20
+            </Text>
+          )}
+        </View>
+      </View>
+
+      {/* Messages */}
+      <ScrollView 
+        ref={scrollViewRef}
+        style={styles.messagesContainer}
+        contentContainerStyle={styles.messagesContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {messages.map((message) => (
+          <View
+            key={message.id}
+            style={[
+              styles.messageRow,
+              message.role === 'user' ? styles.messageRowUser : styles.messageRowCoach
+            ]}
+          >
+            <View
+              style={[
+                styles.messageBubble,
+                message.role === 'user' ? styles.messageBubbleUser : styles.messageBubbleCoach
+              ]}
+            >
+              <Text 
+                variant="body" 
+                style={styles.messageText}
+                color={message.role === 'user' ? colors.textPrimary : colors.textPrimary}
+              >
+                {message.text}
+              </Text>
+            </View>
+          </View>
+        ))}
+        
+        {/* Typing indicator */}
+        {isLoading && (
+          <View style={[styles.messageRow, styles.messageRowCoach]}>
+            <View style={[styles.messageBubble, styles.messageBubbleCoach]}>
+              <View style={styles.typingIndicator}>
+                <View style={styles.typingDot} />
+                <View style={[styles.typingDot, styles.typingDot2]} />
+                <View style={[styles.typingDot, styles.typingDot3]} />
+              </View>
+            </View>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Input Area */}
+      <View style={styles.inputContainer}>
+        {/* Voice toggle button */}
+        {isPro && (
+          <TouchableOpacity 
+            style={[styles.voiceButton, voiceEnabled && styles.voiceButtonActive]}
+            onPress={handleToggleVoice}
+          >
+            <Text style={styles.voiceIcon}>{voiceEnabled ? '🔊' : '🔇'}</Text>
+          </TouchableOpacity>
+        )}
+        
+        {/* Image upload button */}
+        <TouchableOpacity 
+          style={styles.imageButton}
+          onPress={() => document.getElementById('imageInput').click()}
+        >
+          <Text style={styles.imageIcon}>📎</Text>
+        </TouchableOpacity>
+        <input
+          id="imageInput"
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleImageUpload}
+        />
+        
+        {/* Microphone button for speech-to-text */}
+        <TouchableOpacity 
+          style={[styles.micButton, isListening && styles.micButtonActive]}
+          onPress={handleStartListening}
+        >
+          <Text style={styles.micIcon}>{isListening ? '⏹' : '🎤'}</Text>
+        </TouchableOpacity>
+        
+        <TextInput
+          style={styles.input}
+          value={inputText}
+          onChangeText={setInputText}
+          onSubmitEditing={handleSend}
+          placeholder={isListening ? "Listening..." : "Type your message..."}
+          placeholderTextColor={colors.textTertiary}
+          multiline
+          maxLength={500}
+          blurOnSubmit={false}
+        />
+        <TouchableOpacity 
+          style={[
+            styles.sendButton,
+            inputText.trim() && !isLoading && styles.sendButtonActive
+          ]}
+          onPress={handleSend}
+          disabled={!inputText.trim() || isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <View style={styles.arrowIcon}>
+              <Text style={[
+                styles.arrowText,
+                inputText.trim() && styles.arrowTextActive
+              ]}>↑</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bgPrimary,
+  },
+  quoteContainer: {
+    paddingHorizontal: layout.marginHorizontal,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.bgSecondary,
+  },
+  quoteRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  quote: {
+    flex: 1,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    color: colors.textSecondary,
+    fontWeight: typography.weightLight,
+  },
+  messageCounter: {
+    marginLeft: spacing.xs,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 2,
+    backgroundColor: colors.bgTertiary,
+    borderRadius: 4,
+  },
+  messagesContainer: {
+    flex: 1,
+  },
+  messagesContent: {
+    paddingHorizontal: layout.marginHorizontal,
+    paddingVertical: spacing.md,
+    gap: spacing.md,
+  },
+  messageRow: {
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+  },
+  messageRowCoach: {
+    justifyContent: 'flex-start',
+  },
+  messageRowUser: {
+    justifyContent: 'flex-end',
+  },
+  messageBubble: {
+    maxWidth: '80%',
+    padding: spacing.sm,
+    borderRadius: 2,
+  },
+  messageBubbleCoach: {
+    backgroundColor: 'transparent',
+    alignItems: 'flex-start',
+  },
+  messageBubbleUser: {
+    backgroundColor: colors.bgTertiary,
+    alignItems: 'flex-end',
+  },
+  messageText: {
+    lineHeight: typography.lineHeightRelaxed * typography.sizeBody,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingHorizontal: layout.marginHorizontal,
+    paddingVertical: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.bgSecondary,
+    gap: spacing.sm,
+  },
+  input: {
+    flex: 1,
+    minHeight: 44,
+    maxHeight: 120,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    fontSize: typography.sizeBody,
+    fontFamily: typography.fontFamily,
+    color: colors.textPrimary,
+    backgroundColor: colors.bgPrimary,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+  },
+  sendButton: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 18,
+    backgroundColor: colors.bgTertiary,
+  },
+  sendButtonActive: {
+    backgroundColor: colors.primary,
+  },
+  arrowIcon: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  arrowText: {
+    fontSize: 20,
+    fontWeight: typography.weightMedium,
+    color: colors.textTertiary,
+  },
+  arrowTextActive: {
+    color: '#fff',
+  },
+  typingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: spacing.xs,
+  },
+  typingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.textTertiary,
+    opacity: 0.4,
+  },
+  typingDot2: {
+    opacity: 0.6,
+  },
+  typingDot3: {
+    opacity: 0.8,
+  },
+  voiceButton: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 18,
+    backgroundColor: colors.bgTertiary,
+    marginRight: spacing.xs,
+  },
+  voiceButtonActive: {
+    backgroundColor: colors.primary,
+  },
+  voiceIcon: {
+    fontSize: 18,
+  },
+  imageButton: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 18,
+    backgroundColor: colors.bgTertiary,
+    marginRight: spacing.xs,
+  },
+  imageIcon: {
+    fontSize: 18,
+  },
+  micButton: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 18,
+    backgroundColor: colors.bgTertiary,
+    marginRight: spacing.xs,
+  },
+  micButtonActive: {
+    backgroundColor: colors.error,
+  },
+  micIcon: {
+    fontSize: 18,
+  },
+});
