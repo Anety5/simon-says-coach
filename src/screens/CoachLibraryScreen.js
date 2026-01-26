@@ -76,12 +76,12 @@ export default function CoachLibraryScreen({ navigation }) {
       Animated.timing(scaleAnims[index], {
         toValue: 0.97,
         duration: 100,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(scaleAnims[index], {
         toValue: 1,
         duration: 100,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
 

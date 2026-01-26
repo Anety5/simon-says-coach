@@ -33,6 +33,10 @@ export const saveUserProfile = async (userId, profileData) => {
     return { success: true };
   } catch (error) {
     console.error('Error saving user profile:', error);
+    // Gracefully handle Firebase permission errors
+    if (error.code === 'permission-denied') {
+      console.warn('Firebase permissions not configured - running in demo mode');
+    }
     return { success: false, error };
   }
 };
@@ -52,6 +56,9 @@ export const getUserProfile = async (userId) => {
     }
   } catch (error) {
     console.error('Error getting user profile:', error);
+    if (error.code === 'permission-denied') {
+      console.warn('Firebase permissions not configured - running in demo mode');
+    }
     return { success: false, error };
   }
 };
@@ -74,6 +81,9 @@ export const setActiveCoach = async (userId, coachId) => {
     return { success: true };
   } catch (error) {
     console.error('Error setting active coach:', error);
+    if (error.code === 'permission-denied') {
+      console.warn('Firebase permissions not configured - running in demo mode');
+    }
     return { success: false, error };
   }
 };
@@ -100,6 +110,9 @@ export const createConversation = async (userId, coachId) => {
     return conversationRef.id; // Return just the ID string
   } catch (error) {
     console.error('Error creating conversation:', error);
+    if (error.code === 'permission-denied') {
+      console.warn('Firebase permissions not configured - running in demo mode');
+    }
     return null;
   }
 };

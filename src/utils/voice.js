@@ -1,28 +1,18 @@
 // Voice capabilities for Simon Says Coach
 // Text-to-Speech for coach responses and Speech-to-Text for user input
-import { Audio } from 'expo-av';
-
-let audioRecording = null;
-let audioSound = null;
+// Using Web Speech API for browser compatibility
 
 /**
- * Initialize audio permissions
+ * Initialize audio permissions (Web Speech API doesn't require explicit permissions)
  */
 export const initializeAudio = async () => {
   try {
-    const { status } = await Audio.requestPermissionsAsync();
-    if (status !== 'granted') {
-      console.warn('Audio permissions not granted');
-      return false;
+    // Check if Web Speech API is available
+    if (typeof window !== 'undefined' && (window.speechSynthesis || window.webkitSpeechRecognition || window.SpeechRecognition)) {
+      return true;
     }
-    
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: false,
-    });
-    
-    return true;
+    console.warn('Web Speech API not supported in this browser');
+    return false;
   } catch (error) {
     console.error('Error initializing audio:', error);
     return false;

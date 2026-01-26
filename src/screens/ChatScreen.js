@@ -16,7 +16,7 @@ export default function ChatScreen({ navigation, route }) {
     {
       id: 1,
       role: 'coach',
-      text: 'Hello! I\'m your Productivity Coach. I\'m here to help you manage your time, tasks, and energy more effectively. What would you like to work on today?',
+      text: 'Hello! I am Simon, your productivity coach. Here are some ways I can help you:\n\n• "Help me prioritize my tasks for today"\n• "I\'m feeling overwhelmed with my workload"\n• "Create a morning routine for me"\n• "How can I improve my focus?"\n\nWhat would you like to work on?',
       timestamp: new Date()
     }
   ]);

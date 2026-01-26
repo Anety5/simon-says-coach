@@ -221,7 +221,7 @@ export const generateCoachResponse = async (coachType, conversationHistory, user
             contents: contents,
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 500,
+              maxOutputTokens: 2048,
             }
           })
         }
@@ -235,12 +235,21 @@ export const generateCoachResponse = async (coachType, conversationHistory, user
         throw error;
       }
       
-      return data.candidates[0].content.parts[0].text;
+      const responseText = data.candidates[0].content.parts[0].text;
+      const finishReason = data.candidates[0].finishReason;
+      
+      console.log('Gemini finish reason:', finishReason);
+      
+      if (finishReason === 'MAX_TOKENS') {
+        console.warn('Response was truncated due to max tokens');
+      }
+      
+      return responseText;
     };
     
     const text = await exponentialBackoffWithJitter(apiCall);
     
-    console.log('Gemini response received:', text.substring(0, 100));
+    console.log('Gemini response received:', text);
     
     return text;
     
