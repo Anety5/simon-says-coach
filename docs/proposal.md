@@ -73,10 +73,22 @@ Modern professionals face three critical productivity challenges:
    - Integration with Slack/Teams
    - HR dashboard for wellbeing insights
 
-3. **Marketplace** (revenue share)
-   - Community-created coach personalities
-   - Premium coaching frameworks from experts
-   - Integration with productivity tools (Notion, Todoist, etc.)
+3. **Coach Marketplace** (Creator Economy Model)
+   - **Create**: Users design custom AI coaches with unique prompts, specializations, and methodologies
+   - **Share**: Each coach gets a unique shareable link (e.g., `simon-says.app/coach/cindy-photo-mentor`)
+   - **Monetize**: Creators set price ($2.99-$19.99 one-time purchase via RevenueCat)
+   - **Revenue Split**: 70% creator / 30% platform
+   - **Discovery**: Browse featured coaches by category (Photography, Startup Strategy, Parenting, etc.)
+   - **Social Proof**: Profile pages showing creator bio, coach description, sample conversations
+   
+   **Example**: "Hi, I'm Cindy, a professional photographer. I created the Photography Mentor Coach to help aspiring photographers master lighting and composition. Get instant feedback on your work. $4.99 one-time purchase."
+   
+   **Viral Loop**: Users who buy a coach can rate/review it, creating social proof that drives more sales
+
+4. **Integration Marketplace** (revenue share)
+   - Premium integrations with productivity tools (Notion, Todoist, etc.)
+   - Developer API for third-party coach creation
+   - Zapier/Make automations
 
 ## Competitive Advantage
 
