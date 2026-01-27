@@ -8,8 +8,10 @@ export const HamburgerMenu = ({ currentScreen, onNavigate }) => {
 
   const menuItems = [
     { key: 'library', label: 'COACHES', icon: '◎' },
+    { key: 'marketplace', label: 'MARKETPLACE', icon: '◕' },
     { key: 'conversations', label: 'HISTORY', icon: '◈' },
     { key: 'settings', label: 'SETTINGS', icon: '◐' },
+    { key: 'legal', label: 'PRIVACY & TERMS', icon: '⚖️' },
   ];
 
   return (

@@ -1,0 +1,23 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1280" height="720" fill="#0A0A0A"/>
+  
+  <!-- Cube icon on left with terracotta -->
+  <rect x="160" y="210" width="240" height="240" fill="none" stroke="#E8704A" stroke-width="3" opacity="0.4"/>
+  <rect x="200" y="250" width="160" height="160" fill="none" stroke="#E8704A" stroke-width="3" opacity="0.7"/>
+  <rect x="240" y="290" width="80" height="80" fill="#E8704A"/>
+  
+  <!-- Title text -->
+  <text x="480" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="68" font-weight="300" fill="#FFFFFF" letter-spacing="-2">
+    Simon Says
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="480" y="400" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="300" fill="#999999">
+    AI coaching that adapts to you
+  </text>
+  
+  <!-- Minimal accent line with terracotta -->
+  <line x1="480" y1="430" x2="680" y2="430" stroke="#E8704A" stroke-width="2" opacity="0.4"/>
+</svg>
+

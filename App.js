@@ -9,6 +9,9 @@ import ChatScreen from './src/screens/ChatScreen';
 import PaywallScreen from './src/screens/PaywallScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import ConversationsScreen from './src/screens/ConversationsScreen';
+import MarketplaceScreen from './src/screens/MarketplaceScreen';
+import CoachProfileScreen from './src/screens/CoachProfileScreen';
+import LegalScreen from './src/screens/LegalScreen';
 import { HamburgerMenu } from './src/components';
 import { colors } from './src/config/theme';
 import { initializeUser } from './src/utils/auth';
@@ -72,6 +75,12 @@ export default function App() {
         return <SettingsScreen navigation={navigation} />;
       case 'conversations':
         return <ConversationsScreen navigation={navigation} />;
+      case 'marketplace':
+        return <MarketplaceScreen navigation={navigation} />;
+      case 'coachProfile':
+        return <CoachProfileScreen navigation={navigation} route={{ params: navigationParams }} />;
+      case 'legal':
+        return <LegalScreen navigation={navigation} />;
       default:
         return <WelcomeScreen navigation={navigation} />;
     }

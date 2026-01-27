@@ -4,7 +4,7 @@
 
 **Annette** - Solo Founder & Full-Stack Developer
 
-I'm an independent software developer passionate about building tools that help people work smarter, not harder. With a background in product design and engineering, I've spent years exploring how technology can augment human productivity without adding complexity or overwhelm.
+I'm an independent software developer passionate about building tools that help people work smarter, not harder. With a background in product design and engineering, I've spent years working with human physiology and function and now exploring how technology can augment human productivity without adding complexity.
 
 ## Background & Experience
 
@@ -20,13 +20,15 @@ I believe the best productivity tools don't just track what you do - they unders
 
 ## Why I Built Simon Says
 
-The idea came from my own struggle with productivity advice overload. I'd read books on time management, try new task apps, follow productivity YouTubers - but nothing stuck. The advice was either too generic ("just focus!") or too rigid (forcing a specific system).
+I built Simon Says for Simon.
 
-I realized what I needed wasn't *more* advice, but **contextual coaching** - someone who could meet me where I was, understand my specific challenge, and give me actionable next steps based on my situation.
+Inspired by his minimalistic, beautiful approach to design, I wanted to create something simple and elegant for him - a tool that strips away complexity and focuses on what matters. His aesthetic sensibility shaped every decision: the black and white color palette, the clean typography, the uncluttered interface. 
+
+The idea also came from my own struggle with productivity advice overload. I realized what I needed wasn't *more* advice, but **contextual coaching** - someone who could meet me where I was, understand my specific challenge, and give me actionable next steps based on my situation.
 
 When I experimented with AI chatbots like ChatGPT, I saw the potential - but they lacked consistency and coaching methodology. Every conversation started from scratch. I wanted persistent context, specialized expertise, and a UX designed for habit formation.
 
-**Simon Says AI Coach** is the tool I wished existed: 6 expert coaches in your pocket, available 24/7, adapting to your needs in real-time.
+**Simon Says AI Coach** is the tool I wished existed: 6 expert coaches in your pocket, available 24/7, adapting to your needs in real-time - all wrapped in the kind of beautiful, minimalist design Simon would appreciate.
 
 ## What I Learned Building This
 
@@ -61,7 +63,7 @@ I'm fascinated by **AI-augmented productivity** and **human-centered design**. P
 
 ## Let's Connect
 
-I love talking about AI product development, prompt engineering, and sustainable productivity. If you're building something in this space or want to collaborate, reach out!
+If you're building something in this space or want to collaborate, reach out!
 
 - **GitHub**: https://github.com/Anety5
 - **Project**: https://github.com/Anety5/simon-says-coach

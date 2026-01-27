@@ -1,0 +1,27 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#0A0A0A"/>
+  
+  <!-- Outer cube frame -->
+  <rect x="96" y="96" width="320" height="320" fill="none" stroke="#FFFFFF" stroke-width="3" opacity="0.3"/>
+  
+  <!-- "S" letter - modern geometric design -->
+  <path d="M 256 160 
+           L 340 160 
+           L 340 220
+           L 256 220
+           L 256 280
+           L 340 280
+           L 340 340
+           L 172 340
+           L 172 280
+           L 256 280
+           L 256 220
+           L 172 220
+           L 172 160
+           Z" 
+        fill="#FFFFFF"/>
+  
+  <!-- Subtle accent line -->
+  <line x1="416" y1="256" x2="480" y2="256" stroke="#FFFFFF" stroke-width="2" opacity="0.5"/>
+</svg>

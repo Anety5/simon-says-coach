@@ -1,0 +1,14 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#0A0A0A"/>
+  
+  <!-- Outer cube frame with terracotta -->
+  <rect x="106" y="106" width="300" height="300" fill="none" stroke="#E8704A" stroke-width="3" opacity="0.4"/>
+  
+  <!-- Inner cube -->
+  <rect x="156" y="156" width="200" height="200" fill="none" stroke="#E8704A" stroke-width="3" opacity="0.7"/>
+  
+  <!-- Center solid square -->
+  <rect x="206" y="206" width="100" height="100" fill="#E8704A"/>
+</svg>
+

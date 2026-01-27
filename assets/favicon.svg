@@ -1,0 +1,13 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="32" height="32" fill="#0A0A0A"/>
+  
+  <!-- Outer cube -->
+  <rect x="4" y="4" width="24" height="24" fill="none" stroke="#E8704A" stroke-width="1.5" opacity="0.5"/>
+  
+  <!-- Inner cube -->
+  <rect x="8" y="8" width="16" height="16" fill="none" stroke="#E8704A" stroke-width="1.5" opacity="0.8"/>
+  
+  <!-- Center solid square -->
+  <rect x="12" y="12" width="8" height="8" fill="#E8704A"/>
+</svg>

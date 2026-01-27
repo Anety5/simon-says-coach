@@ -11,7 +11,9 @@ import {
   where,
   orderBy,
   limit,
-  Timestamp
+  Timestamp,
+  arrayUnion,
+  increment
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
@@ -234,9 +236,149 @@ export const getUserCustomCoaches = async (userId) => {
       coaches.push({ id: doc.id, ...doc.data() });
     });
     
-    return { success: true, data: coaches };
+    return { success: true, coaches };
   } catch (error) {
     console.error('Error getting custom coaches:', error);
+    if (error.code === 'permission-denied') {
+      console.warn('Firebase permissions not configured - running in demo mode');
+    }
+    return { success: false, error };
+  }
+};
+
+// ============================================
+// COMMUNITY COACHES MARKETPLACE
+// ============================================
+
+/**
+ * Publish coach to marketplace
+ */
+export const publishCoachToMarketplace = async (userId, coachData) => {
+  try {
+    const marketplaceCoach = {
+      ...coachData,
+      creatorId: userId,
+      creatorName: coachData.creatorName || 'Anonymous',
+      price: coachData.price || 4.99,
+      rating: 0,
+      purchases: 0,
+      isPublished: true,
+      publishedAt: Timestamp.now(),
+    };
+    
+    const coachRef = await addDoc(collection(db, 'communityCoaches'), marketplaceCoach);
+    console.log('Coach published to marketplace:', coachRef.id);
+    return { success: true, coachId: coachRef.id };
+  } catch (error) {
+    console.error('Error publishing coach:', error);
+    if (error.code === 'permission-denied') {
+      console.warn('Firebase permissions not configured - running in demo mode');
+    }
+    return { success: false, error };
+  }
+};
+
+/**
+ * Get all marketplace coaches
+ */
+export const getMarketplaceCoaches = async () => {
+  try {
+    const coachesRef = collection(db, 'communityCoaches');
+    const q = query(
+      coachesRef,
+      where('isPublished', '==', true),
+      orderBy('purchases', 'desc'),
+      limit(50)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const coaches = [];
+    querySnapshot.forEach((doc) => {
+      coaches.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return { success: true, coaches };
+  } catch (error) {
+    console.error('Error getting marketplace coaches:', error);
+    if (error.code === 'permission-denied') {
+      console.warn('Firebase permissions not configured - running in demo mode');
+    }
+    // Return mock data for demo
+    return { 
+      success: true, 
+      coaches: [
+        {
+          id: 'mock-1',
+          name: 'Photography Mentor',
+          description: 'Master lighting and composition with pro feedback',
+          creatorName: 'Cindy',
+          creatorBio: 'Professional photographer with 10 years experience',
+          price: 4.99,
+          rating: 4.8,
+          purchases: 234
+        },
+        {
+          id: 'mock-2',
+          name: 'Startup Strategy Coach',
+          description: 'Navigate early-stage startup challenges',
+          creatorName: 'Alex',
+          creatorBio: '3x founder, 2 exits',
+          price: 9.99,
+          rating: 4.9,
+          purchases: 156
+        }
+      ]
+    };
+  }
+};
+
+/**
+ * Get single coach from marketplace
+ */
+export const getMarketplaceCoach = async (coachId) => {
+  try {
+    const coachRef = doc(db, 'communityCoaches', coachId);
+    const coachSnap = await getDoc(coachRef);
+    
+    if (coachSnap.exists()) {
+      return { success: true, coach: { id: coachSnap.id, ...coachSnap.data() } };
+    } else {
+      return { success: false, error: 'Coach not found' };
+    }
+  } catch (error) {
+    console.error('Error getting marketplace coach:', error);
+    if (error.code === 'permission-denied') {
+      console.warn('Firebase permissions not configured - running in demo mode');
+    }
+    return { success: false, error };
+  }
+};
+
+/**
+ * Record coach purchase
+ */
+export const recordCoachPurchase = async (userId, coachId) => {
+  try {
+    // Add to user's purchased coaches
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      purchasedCoaches: arrayUnion(coachId),
+      updatedAt: Timestamp.now()
+    });
+    
+    // Increment purchase count on coach
+    const coachRef = doc(db, 'communityCoaches', coachId);
+    await updateDoc(coachRef, {
+      purchases: increment(1)
+    });
+    
+    console.log('Coach purchase recorded:', coachId);
+    return { success: true };
+  } catch (error) {
+    console.error('Error recording purchase:', error);
+    if (error.code === 'permission-denied') {
+      console.warn('Firebase permissions not configured - running in demo mode');
+    }
     return { success: false, error };
   }
 };

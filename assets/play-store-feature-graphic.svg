@@ -1,0 +1,25 @@
+<svg width="1024" height="500" viewBox="0 0 1024 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1024" height="500" fill="#0A0A0A"/>
+  
+  <!-- Left side: Logo -->
+  <g transform="translate(80, 90)">
+    <!-- Outer cube frame -->
+    <rect x="26" y="26" width="270" height="270" fill="none" stroke="#E8704A" stroke-width="2.5" opacity="0.4"/>
+    <!-- Inner cube -->
+    <rect x="71" y="71" width="180" height="180" fill="none" stroke="#E8704A" stroke-width="2.5" opacity="0.7"/>
+    <!-- Center solid square -->
+    <rect x="116" y="116" width="90" height="90" fill="#E8704A"/>
+  </g>
+  
+  <!-- Right side: Text -->
+  <text x="480" y="200" font-family="system-ui, -apple-system, sans-serif" font-size="68" font-weight="bold" fill="#FFFFFF">
+    Simon Says
+  </text>
+  <text x="480" y="270" font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="400" fill="#E8704A">
+    AI Coach
+  </text>
+  <text x="480" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="300" fill="#CCCCCC">
+    6 Personalities • Voice & Image • Powered by Gemini
+  </text>
+</svg>
