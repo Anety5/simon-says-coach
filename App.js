@@ -19,6 +19,25 @@ import { initializePurchases } from './src/utils/purchases';
 
 export default function App() {
   const [userId, setUserId] = useState(null);
+  const [isPurchasesInitialized, setIsPurchasesInitialized] = useState(false);
+
+  // Initialize RevenueCat on app start
+  useEffect(() => {
+    const setupRevenueCat = async () => {
+      try {
+        // Initialize with anonymous user ID (will be updated when user signs in)
+        const anonymousId = 'anonymous_' + Date.now();
+        await initializePurchases(anonymousId);
+        setIsPurchasesInitialized(true);
+        console.log('✅ RevenueCat initialized in App.js');
+      } catch (error) {
+        console.error('Failed to initialize RevenueCat:', error);
+        setIsPurchasesInitialized(true); // Continue anyway
+      }
+    };
+    
+    setupRevenueCat();
+  }, []);
 
   // Note: User initialization happens on WelcomeScreen when user clicks begin
   // No auto-initialization needed here to avoid auth conflicts

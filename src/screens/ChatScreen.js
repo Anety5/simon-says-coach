@@ -88,7 +88,7 @@ export default function ChatScreen({ navigation, route }) {
     setIsLoadingConversation(false);
     // loadUserProfile();
     // loadOrCreateConversation();
-    // checkSubscription();
+    checkSubscription();
     loadMessageCount();
     // checkVoiceAvailability();
   }, []);

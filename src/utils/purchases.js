@@ -34,21 +34,21 @@ export const initializePurchases = async (userId) => {
 // Check if user has Pro subscription
 export const checkProStatus = async () => {
   try {
-    // TEMPORARY: Enable Pro for all users during testing/demo
-    // Remove this after configuring RevenueCat properly
-    return true;
-    
-    // On web, return false (free tier) for testing
+    // On web, return false (free tier)
     if (Platform.OS === 'web') {
+      console.log('⚠️ RevenueCat not available on web - free tier only');
       return false;
     }
 
     const customerInfo = await Purchases.getCustomerInfo();
     const hasPro = customerInfo.entitlements.active['pro'] !== undefined;
+    
+    console.log('RevenueCat Pro status:', hasPro);
     return hasPro;
   } catch (error) {
     console.error('Error checking Pro status:', error);
-    return true; // Default to Pro during demo
+    // Return false if there's an error - show paywall
+    return false;
   }
 };
 
