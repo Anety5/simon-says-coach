@@ -9,38 +9,44 @@ const COACHES = [
   {
     id: 'productivity',
     title: 'PRODUCTIVITY',
-    description: 'Tactical systems for managing tasks, time, and output',
+    description: 'Get things done. Gives specific frameworks (Eisenhower Matrix, Pomodoro) and immediate action steps. Zero fluff.',
     icon: '⚡',
+    guidance: 'Use when: You have tasks piling up and need tactical execution',
   },
   {
     id: 'strategy',
     title: 'STRATEGY',
-    description: 'Long-term thinking, decision frameworks, planning',
+    description: 'Think long-term. Uses decision frameworks (SWOT, Playing to Win) and asks powerful reframing questions.',
     icon: '◎',
+    guidance: 'Use when: Making big decisions or planning 6+ months ahead',
   },
   {
     id: 'growth',
     title: 'GROWTH',
-    description: 'Skills development, learning paths, career progression',
+    description: 'Level up skills. Identifies skill gaps, recommends courses/resources, creates 30-day learning plans.',
     icon: '↑',
+    guidance: 'Use when: You want to learn something new or advance your career',
   },
   {
     id: 'focus',
     title: 'FOCUS',
-    description: 'Concentration, deep work, eliminating distractions',
+    description: 'Eliminate distractions. Prescribes attention protocols and deep work techniques. Treats focus like a muscle.',
     icon: '◈',
+    guidance: 'Use when: Struggling with concentration or drowning in distractions',
   },
   {
     id: 'wellness',
     title: 'WELLNESS',
-    description: 'Balance, energy management, sustainable performance',
+    description: 'Avoid burnout. Balances ambition with recovery. Designs energy systems, not time management.',
     icon: '◐',
+    guidance: 'Use when: Feeling overwhelmed, tired, or headed toward burnout',
   },
   {
     id: 'creative',
     title: 'CREATIVE',
-    description: 'Idea generation, creative process, experimentation',
+    description: 'Generate ideas. Uses ideation techniques (SCAMPER, Forced Connections) and runs creative sprints.',
     icon: '◇',
+    guidance: 'Use when: Need fresh ideas, breaking creative blocks, or brainstorming',
   },
 ];
 
@@ -148,6 +154,15 @@ export default function CoachLibraryScreen({ navigation }) {
                   {coach.description}
                 </Text>
                 
+                {/* Guidance */}
+                <Text 
+                  variant="tiny" 
+                  color={colors.textTertiary}
+                  style={styles.coachGuidance}
+                >
+                  {coach.guidance}
+                </Text>
+                
                 {/* Status */}
                 <View style={styles.statusContainer}>
                   {activeCoach === coach.id ? (
@@ -253,8 +268,13 @@ const styles = StyleSheet.create({
     letterSpacing: typography.letterSpacingWide,
   },
   coachDescription: {
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
     lineHeight: typography.lineHeightNormal * typography.sizeSmall,
+  },
+  coachGuidance: {
+    marginBottom: spacing.sm,
+    fontStyle: 'italic',
+    lineHeight: typography.lineHeightNormal * typography.sizeTiny,
   },
   statusContainer: {
     marginTop: spacing.xs,

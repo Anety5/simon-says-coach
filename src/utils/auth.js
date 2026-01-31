@@ -1,11 +1,41 @@
 // Authentication utilities for Simon Says Coach
 import { 
   signInAnonymously,
+  signInWithPopup,
+  GoogleAuthProvider,
   onAuthStateChanged,
   signOut as firebaseSignOut
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { saveUserProfile } from './firestore';
+
+// Initialize Google Auth Provider
+const googleProvider = new GoogleAuthProvider();
+
+/**
+ * Sign in with Google
+ */
+export const signInWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    
+    // Save user profile
+    await saveUserProfile(user.uid, {
+      name: user.displayName || '',
+      email: user.email || '',
+      photoURL: user.photoURL || '',
+      isAnonymous: false,
+      createdAt: new Date().toISOString()
+    });
+    
+    console.log('Google user signed in:', user.uid);
+    return { success: true, userId: user.uid, user };
+  } catch (error) {
+    console.error('Error signing in with Google:', error);
+    return { success: false, error };
+  }
+};
 
 /**
  * Sign in user anonymously (no email/password required)
@@ -55,28 +85,39 @@ export const signOut = async () => {
  */
 export const initializeUser = async (profileData = {}) => {
   try {
+    console.log('Starting user initialization...');
+    
     // Sign in anonymously
     const authResult = await signInAnonymous();
     if (!authResult.success) {
+      console.error('Anonymous sign-in failed:', authResult.error);
       return authResult;
     }
 
-    // Create user profile in Firestore
-    const userId = authResult.userId;
-    const profileResult = await saveUserProfile(userId, {
-      ...profileData,
-      isAnonymous: true,
-      createdAt: new Date().toISOString()
-    });
+    console.log('Anonymous sign-in successful:', authResult.userId);
 
-    if (!profileResult.success) {
-      return profileResult;
+    // Create user profile in Firestore (optional - don't fail if this doesn't work)
+    const userId = authResult.userId;
+    try {
+      const profileResult = await saveUserProfile(userId, {
+        ...profileData,
+        isAnonymous: true,
+        createdAt: new Date().toISOString()
+      });
+
+      if (!profileResult.success) {
+        console.warn('Profile save failed, but continuing:', profileResult.error);
+      } else {
+        console.log('User profile saved successfully');
+      }
+    } catch (profileError) {
+      console.warn('Profile save error, but continuing:', profileError);
     }
 
-    console.log('User initialized:', userId);
+    console.log('✅ User initialized successfully:', userId);
     return { success: true, userId, user: authResult.user };
   } catch (error) {
-    console.error('Error initializing user:', error);
-    return { success: false, error };
+    console.error('❌ Critical error initializing user:', error);
+    return { success: false, error: error.message || error };
   }
 };

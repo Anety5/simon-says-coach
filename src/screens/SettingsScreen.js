@@ -11,23 +11,22 @@ const Slider = ({ label, value, onChange, minLabel, maxLabel }) => {
   return (
     <View style={styles.sliderContainer}>
       <Text variant="tiny" style={styles.sliderLabel}>{label}</Text>
-      <View style={styles.sliderTrack}>
-        <input
-          type="range"
-          min="1"
-          max="5"
-          value={value}
-          onChange={(e) => onChange(parseInt(e.target.value))}
-          style={{
-            width: '100%',
-            height: 2,
-            background: colors.border,
-
-            opacity: 1,
-            WebkitAppearance: 'none',
-            cursor: 'pointer',
-          }}
-        />
+      <View style={styles.sliderButtons}>
+        {[1, 2, 3, 4, 5].map((val) => (
+          <TouchableOpacity
+            key={val}
+            style={[
+              styles.sliderButton,
+              value === val && styles.sliderButtonActive
+            ]}
+            onPress={() => onChange(val)}
+          >
+            <Text style={[
+              styles.sliderButtonText,
+              value === val && styles.sliderButtonTextActive
+            ]}>{val}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
       <View style={styles.sliderLabels}>
         <Text variant="small" color={colors.textTertiary}>{minLabel}</Text>
@@ -170,16 +169,21 @@ export default function SettingsScreen({ navigation }) {
           <View style={styles.inputContainer}>
             <Text variant="tiny" style={styles.label}>YOUR PROFESSION</Text>
             <View style={styles.pickerContainer}>
-              <select
-                value={profession}
-                onChange={(e) => setProfession(e.target.value)}
-                style={styles.picker}
-              >
-                <option value="">Select profession...</option>
-                {professions.map((prof) => (
-                  <option key={prof} value={prof}>{prof}</option>
-                ))}
-              </select>
+              {professions.map((prof) => (
+                <TouchableOpacity
+                  key={prof}
+                  style={[
+                    styles.professionButton,
+                    profession === prof && styles.professionButtonActive
+                  ]}
+                  onPress={() => setProfession(prof)}
+                >
+                  <Text style={[
+                    styles.professionText,
+                    profession === prof && styles.professionTextActive
+                  ]}>{prof}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
 
@@ -318,6 +322,60 @@ const styles = StyleSheet.create({
   },
   sliderLabel: {
     marginBottom: spacing.sm,
+  },
+  sliderButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  sliderButton: {
+    flex: 1,
+    aspectRatio: 1,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.bgSecondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sliderButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  sliderButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  sliderButtonTextActive: {
+    color: '#fff',
+  },
+  professionButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.bgSecondary,
+  },
+  professionButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  professionText: {
+    fontSize: 15,
+    color: colors.textSecondary,
+  },
+  professionTextActive: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  pickerContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
   },
   sliderTrack: {
     marginBottom: spacing.xs,

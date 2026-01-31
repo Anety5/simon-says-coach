@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import { Text } from '../components';
 import { colors, spacing, layout, typography } from '../config/theme';
 import { generateCoachResponse, getRandomQuote } from '../utils/gemini';
@@ -10,17 +11,54 @@ import { getUserProfile, createConversation, addMessage, getMessages } from '../
 import { checkProStatus } from '../utils/purchases';
 import { speakText, stopSpeaking, startListening, stopListening, isVoiceAvailable } from '../utils/voice';
 
+// Coach-specific examples and placeholders
+const coachExamples = {
+  productivity: {
+    greeting: 'Hello! I am Simon, your productivity coach. Try one of these prompts below or modify them to fit your needs:',
+    examples: [
+      'Help me prioritize my tasks for today',
+      'I\'m feeling overwhelmed with my workload',
+      'Create a morning routine for me',
+      'How can I improve my focus?'
+    ],
+    placeholder: 'Help me prioritize my tasks for today'
+  },
+  growth: {
+    greeting: 'Hi! I\'m Simon, your growth mindset coach. Here are some ways we can work together:',
+    examples: [
+      'Help me overcome imposter syndrome',
+      'I want to develop better learning habits',
+      'How can I turn failures into learning opportunities?',
+      'Help me set meaningful personal development goals'
+    ],
+    placeholder: 'Help me overcome imposter syndrome'
+  },
+  wellness: {
+    greeting: 'Welcome! I\'m Simon, your wellness coach. Let\'s work on your wellbeing:',
+    examples: [
+      'Help me create a stress management routine',
+      'I\'m struggling with work-life balance',
+      'Guide me through a 5-minute mindfulness exercise',
+      'How can I improve my sleep habits?'
+    ],
+    placeholder: 'Help me create a stress management routine'
+  }
+};
+
 export default function ChatScreen({ navigation, route }) {
   const coachType = route?.params?.coachType || 'productivity';
+  const coachConfig = coachExamples[coachType] || coachExamples.productivity;
+  
   const [messages, setMessages] = useState([
     {
       id: 1,
       role: 'coach',
-      text: 'Hello! I am Simon, your productivity coach. Here are some ways I can help you:\n\n• "Help me prioritize my tasks for today"\n• "I\'m feeling overwhelmed with my workload"\n• "Create a morning routine for me"\n• "How can I improve my focus?"\n\nWhat would you like to work on?',
+      text: `${coachConfig.greeting}\n\n${coachConfig.examples.map((ex, i) => `• "${ex}"`).join('\n')}\n\nWhat would you like to work on?`,
       timestamp: new Date()
     }
   ]);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState(coachConfig.examples?.[0] || '');
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [quote, setQuote] = useState('');
   const [userProfile, setUserProfile] = useState(null);
@@ -32,16 +70,26 @@ export default function ChatScreen({ navigation, route }) {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [showDebugInfo, setShowDebugInfo] = useState(true);
   const scrollViewRef = useRef(null);
   const recognitionRef = useRef(null);
+  const authRetryCount = useRef(0);
+
+  // Get API key status for debugging
+  const apiKey = Constants.expoConfig?.extra?.EXPO_PUBLIC_GEMINI_API_KEY || 
+                 process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 
   useEffect(() => {
     setQuote(getRandomQuote());
-    loadUserProfile();
-    loadOrCreateConversation();
-    checkSubscription();
+    // Temporarily skip Firebase calls
+    console.log('ChatScreen loaded - Firebase calls temporarily disabled');
+    console.log('API Key present:', apiKey ? 'YES' : 'NO');
+    setIsLoadingConversation(false);
+    // loadUserProfile();
+    // loadOrCreateConversation();
+    // checkSubscription();
     loadMessageCount();
-    checkVoiceAvailability();
+    // checkVoiceAvailability();
   }, []);
 
   useEffect(() => {
@@ -114,10 +162,19 @@ export default function ChatScreen({ navigation, route }) {
     try {
       const user = getCurrentUser();
       if (!user) {
-        console.error('No user found');
-        setIsLoadingConversation(false);
-        return;
+        if (authRetryCount.current < 5) {
+          authRetryCount.current += 1;
+          console.warn(`No user found yet (attempt ${authRetryCount.current}/5), waiting for auth...`);
+          setTimeout(loadOrCreateConversation, 500);
+          return;
+        } else {
+          console.error('Auth timeout - user still not found after 5 retries');
+          setIsLoadingConversation(false);
+          return;
+        }
       }
+
+      console.log('User found, creating conversation for:', user.uid);
 
       // Check if we're resuming an existing conversation
       const params = route?.params || {};
@@ -126,24 +183,33 @@ export default function ChatScreen({ navigation, route }) {
         console.log('Resuming conversation:', params.conversationId);
         
         // Load existing messages from this conversation
-        const existingMessages = await getMessages(params.conversationId);
-        
-        if (existingMessages.length > 0) {
-          // Convert Firestore messages to our format
-          const formattedMessages = existingMessages.map((msg, index) => ({
-            id: index + 1,
-            role: msg.role,
-            text: msg.text,
-            timestamp: msg.timestamp?.toDate() || new Date()
-          }));
-          setMessages(formattedMessages);
-          console.log(`Loaded ${formattedMessages.length} messages from Firestore`);
+        try {
+          const existingMessages = await getMessages(params.conversationId);
+          
+          if (existingMessages.length > 0) {
+            // Convert Firestore messages to our format
+            const formattedMessages = existingMessages.map((msg, index) => ({
+              id: index + 1,
+              role: msg.role,
+              text: msg.text,
+              timestamp: msg.timestamp?.toDate() || new Date()
+            }));
+            setMessages(formattedMessages);
+            console.log(`Loaded ${formattedMessages.length} messages from Firestore`);
+          }
+        } catch (msgError) {
+          console.error('Error loading messages:', msgError);
         }
       } else {
         // Create a new conversation for this coach
-        const convId = await createConversation(user.uid, coachType);
-        setConversationId(convId);
-        console.log('Conversation created:', convId);
+        try {
+          const convId = await createConversation(user.uid, coachType);
+          setConversationId(convId);
+          console.log('Conversation created:', convId);
+        } catch (convError) {
+          console.error('Error creating conversation:', convError);
+          // Continue anyway - we can still chat without saving
+        }
       }
 
       setIsLoadingConversation(false);
@@ -164,6 +230,7 @@ export default function ChatScreen({ navigation, route }) {
 
     const userInput = inputText.trim();
     setInputText('');
+    setShowSuggestions(false);
     setIsLoading(true);
 
     // Increment message count
@@ -195,7 +262,8 @@ export default function ChatScreen({ navigation, route }) {
 
     try {
       // Get AI response from Gemini with user context
-      const response = await generateCoachResponse(coachType, updatedMessages, userProfile);
+      console.log('Calling generateCoachResponse with userProfile:', userProfile);
+      const response = await generateCoachResponse(coachType, updatedMessages, userProfile || {});
       
       // Add coach response
       const coachMessage = {
@@ -382,6 +450,24 @@ export default function ChatScreen({ navigation, route }) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {/* Debug Info Overlay - Shows API status */}
+      {showDebugInfo && (
+        <TouchableOpacity 
+          style={styles.debugOverlay}
+          onPress={() => setShowDebugInfo(false)}
+        >
+          <Text variant="tiny" style={styles.debugText}>
+            🔍 Debug Info (tap to hide)
+          </Text>
+          <Text variant="tiny" style={styles.debugText}>
+            API Key: {apiKey ? '✅ Loaded' : '❌ NOT FOUND'}
+          </Text>
+          <Text variant="tiny" style={styles.debugText}>
+            Messages: {messages.length} | Loading: {isLoading ? 'Yes' : 'No'}
+          </Text>
+        </TouchableOpacity>
+      )}
+      
       {/* Inspirational Quote Header */}
       <View style={styles.quoteContainer}>
         <View style={styles.quoteRow}>
@@ -444,50 +530,32 @@ export default function ChatScreen({ navigation, route }) {
 
       {/* Input Area */}
       <View style={styles.inputContainer}>
-        {/* Voice toggle button */}
-        {isPro && (
-          <TouchableOpacity 
-            style={[styles.voiceButton, voiceEnabled && styles.voiceButtonActive]}
-            onPress={handleToggleVoice}
-          >
-            <Text style={styles.voiceIcon}>{voiceEnabled ? '🔊' : '🔇'}</Text>
-          </TouchableOpacity>
-        )}
-        
-        {/* Image upload button */}
-        <TouchableOpacity 
-          style={styles.imageButton}
-          onPress={() => document.getElementById('imageInput').click()}
-        >
-          <Text style={styles.imageIcon}>📎</Text>
-        </TouchableOpacity>
-        <input
-          id="imageInput"
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={handleImageUpload}
-        />
-        
-        {/* Microphone button for speech-to-text */}
-        <TouchableOpacity 
-          style={[styles.micButton, isListening && styles.micButtonActive]}
-          onPress={handleStartListening}
-        >
-          <Text style={styles.micIcon}>{isListening ? '⏹' : '🎤'}</Text>
-        </TouchableOpacity>
-        
-        <TextInput
-          style={styles.input}
-          value={inputText}
-          onChangeText={setInputText}
-          onSubmitEditing={handleSend}
-          placeholder={isListening ? "Listening..." : "Type your message..."}
-          placeholderTextColor={colors.textTertiary}
-          multiline
-          maxLength={500}
-          blurOnSubmit={false}
-        />
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.input}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Type your message..."
+            placeholderTextColor={colors.textTertiary}
+            multiline
+            maxLength={1000}
+            blurOnSubmit={false}
+            returnKeyType="default"
+          />
+          {showSuggestions && inputText === '' && (
+            <View style={styles.suggestionsContainer}>
+              {coachConfig.examples.slice(0, 2).map((example, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.suggestionChip}
+                  onPress={() => setInputText(example)}
+                >
+                  <Text style={styles.suggestionText} numberOfLines={1}>{example}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
         <TouchableOpacity 
           style={[
             styles.sendButton,
@@ -581,7 +649,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: layout.marginHorizontal,
-    paddingVertical: spacing.sm,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.lg + spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.bgSecondary,
@@ -589,10 +658,10 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    minHeight: 44,
-    maxHeight: 120,
+    minHeight: 80,
+    maxHeight: 200,
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
+    paddingVertical: spacing.sm,
     fontSize: typography.sizeBody,
     fontFamily: typography.fontFamily,
     color: colors.textPrimary,
@@ -600,6 +669,35 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 8,
+    textAlignVertical: 'top',
+  },
+  inputWrapper: {
+    flex: 1,
+    position: 'relative',
+  },
+  suggestionsContainer: {
+    position: 'absolute',
+    bottom: 50,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.xs,
+    paddingBottom: spacing.xs,
+  },
+  suggestionChip: {
+    flex: 1,
+    backgroundColor: colors.bgTertiary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  suggestionText: {
+    fontSize: typography.sizeSmall,
+    color: colors.textSecondary,
+    fontFamily: typography.fontFamily,
   },
   sendButton: {
     width: 36,
@@ -686,5 +784,21 @@ const styles = StyleSheet.create({
   },
   micIcon: {
     fontSize: 18,
+  },
+  debugOverlay: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.sm,
+    right: spacing.sm,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    padding: spacing.sm,
+    borderRadius: 8,
+    zIndex: 1000,
+  },
+  debugText: {
+    color: '#00ff00',
+    fontFamily: 'monospace',
+    fontSize: 10,
+    marginBottom: 2,
   },
 });

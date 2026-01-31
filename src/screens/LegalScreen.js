@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { Text } from '../components';
-import { COLORS, SPACING } from '../config/theme';
+import { colors as COLORS, spacing as SPACING } from '../config/theme';
 
 export default function LegalScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('privacy');

@@ -9,23 +9,22 @@ const Slider = ({ label, value, onChange, minLabel, maxLabel }) => {
   return (
     <View style={styles.sliderContainer}>
       <Text variant="tiny" style={styles.sliderLabel}>{label}</Text>
-      <View style={styles.sliderTrack}>
-        <input
-          type="range"
-          min="1"
-          max="5"
-          value={value}
-          onChange={(e) => onChange(parseInt(e.target.value))}
-          style={{
-            width: '100%',
-            height: 2,
-            background: colors.border,
-
-            opacity: 1,
-            WebkitAppearance: 'none',
-            cursor: 'pointer',
-          }}
-        />
+      <View style={styles.sliderButtons}>
+        {[1, 2, 3, 4, 5].map((val) => (
+          <TouchableOpacity
+            key={val}
+            style={[
+              styles.sliderButton,
+              value === val && styles.sliderButtonActive
+            ]}
+            onPress={() => onChange(val)}
+          >
+            <Text style={[
+              styles.sliderButtonText,
+              value === val && styles.sliderButtonTextActive
+            ]}>{val}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
       <View style={styles.sliderLabels}>
         <Text variant="small" color={colors.textTertiary}>{minLabel}</Text>
@@ -183,6 +182,34 @@ const styles = StyleSheet.create({
   },
   sliderLabel: {
     marginBottom: spacing.sm,
+  },
+  sliderButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  sliderButton: {
+    flex: 1,
+    aspectRatio: 1,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.bgSecondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sliderButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  sliderButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  sliderButtonTextActive: {
+    color: '#fff',
   },
   sliderTrack: {
     marginBottom: spacing.xs,

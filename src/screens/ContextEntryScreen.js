@@ -1,6 +1,6 @@
 // Context Entry Screen - Onboarding 1/3
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button, Input, Text } from '../components';
 import { colors, spacing, layout } from '../config/theme';
@@ -93,16 +93,21 @@ export const ContextEntryScreen = ({ navigation, userProfile, setUserProfile }) 
           <View style={styles.inputContainer}>
             <Text variant="tiny" style={styles.label}>YOUR PROFESSION</Text>
             <View style={styles.pickerContainer}>
-              <select
-                value={profession}
-                onChange={(e) => setProfession(e.target.value)}
-                style={styles.picker}
-              >
-                <option value="">Select profession...</option>
-                {professions.map((prof) => (
-                  <option key={prof} value={prof}>{prof}</option>
-                ))}
-              </select>
+              {professions.map((prof) => (
+                <TouchableOpacity
+                  key={prof}
+                  style={[
+                    styles.professionButton,
+                    profession === prof && styles.professionButtonActive
+                  ]}
+                  onPress={() => setProfession(prof)}
+                >
+                  <Text style={[
+                    styles.professionText,
+                    profession === prof && styles.professionTextActive
+                  ]}>{prof}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
 
@@ -177,11 +182,30 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   pickerContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
+  professionButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 8,
     backgroundColor: colors.bgSecondary,
-    overflow: 'hidden',
+  },
+  professionButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  professionText: {
+    fontSize: 15,
+    color: colors.textSecondary,
+  },
+  professionTextActive: {
+    color: '#fff',
+    fontWeight: '600',
   },
   picker: {
     height: 56,

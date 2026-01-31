@@ -20,22 +20,9 @@ import { initializePurchases } from './src/utils/purchases';
 export default function App() {
   const [userId, setUserId] = useState(null);
 
-  // Initialize Firebase user on app start
-  useEffect(() => {
-    const initUser = async () => {
-      const result = await initializeUser();
-      if (result.success) {
-        setUserId(result.userId);
-        console.log('✅ Firebase connected! User ID:', result.userId);
-        
-        // Initialize RevenueCat with user ID
-        await initializePurchases(result.userId);
-      } else {
-        console.error('❌ Firebase connection failed:', result.error);
-      }
-    };
-    initUser();
-  }, []);
+  // Note: User initialization happens on WelcomeScreen when user clicks begin
+  // No auto-initialization needed here to avoid auth conflicts
+  
   const [currentScreen, setCurrentScreen] = useState('welcome');
 
   // State for navigation with params
