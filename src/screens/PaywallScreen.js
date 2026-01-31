@@ -44,8 +44,11 @@ export default function PaywallScreen({ navigation, onDismiss }) {
 
     if (result.success) {
       alert('🎉 Welcome to Pro! All features unlocked.');
-      if (onDismiss) onDismiss(true);
-      else navigation.goBack();
+      if (onDismiss) {
+        onDismiss(true);
+      } else {
+        navigation.navigate('library');
+      }
     } else if (!result.cancelled) {
       alert('Purchase failed: ' + (result.error || 'Unknown error'));
     }
@@ -58,8 +61,11 @@ export default function PaywallScreen({ navigation, onDismiss }) {
 
     if (result.success && result.hasPro) {
       alert('✅ Purchases restored! Pro features activated.');
-      if (onDismiss) onDismiss(true);
-      else navigation.goBack();
+      if (onDismiss) {
+        onDismiss(true);
+      } else {
+        navigation.navigate('library');
+      }
     } else if (result.success) {
       alert('No active subscriptions found.');
     } else {
@@ -72,7 +78,13 @@ export default function PaywallScreen({ navigation, onDismiss }) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity 
-          onPress={() => onDismiss ? onDismiss(false) : navigation.goBack()}
+          onPress={() => {
+            if (onDismiss) {
+              onDismiss(false);
+            } else {
+              navigation.navigate('library');
+            }
+          }}
           style={styles.closeButton}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
         >

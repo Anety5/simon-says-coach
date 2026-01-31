@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import * as DocumentPicker from 'expo-document-picker';
 import { Text } from '../components';
 import { colors, spacing, layout, typography } from '../config/theme';
 import { generateCoachResponse, getRandomQuote } from '../utils/gemini';
@@ -70,6 +71,7 @@ export default function ChatScreen({ navigation, route }) {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [attachedDocument, setAttachedDocument] = useState(null);
   const [showDebugInfo, setShowDebugInfo] = useState(true);
   const scrollViewRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -445,11 +447,43 @@ export default function ChatScreen({ navigation, route }) {
     }
   };
 
+  const handlePickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: '*/*',
+        copyToCacheDirectory: true,
+      });
+      
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const doc = result.assets[0];
+        setAttachedDocument(doc);
+        setInputText(inputText + `\n\n[Attached: ${doc.name}]`);
+      }
+    } catch (error) {
+      console.error('Error picking document:', error);
+      alert('Could not attach document. Please try again.');
+    }
+  };
+
   return (
     <KeyboardAvoidingView 
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {/* Header with Back Button */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.navigate('library')}
+        >
+          <Text style={styles.backButtonText}>☰ Menu</Text>
+        </TouchableOpacity>
+        <Text variant="h3" style={styles.headerTitle}>
+          {coachType.charAt(0).toUpperCase() + coachType.slice(1)} Coach
+        </Text>
+        <View style={styles.headerSpacer} />
+      </View>
+
       {/* Debug Info Overlay - Shows API status */}
       {showDebugInfo && (
         <TouchableOpacity 
@@ -530,6 +564,14 @@ export default function ChatScreen({ navigation, route }) {
 
       {/* Input Area */}
       <View style={styles.inputContainer}>
+        {/* Attachment button */}
+        <TouchableOpacity 
+          style={styles.attachButton}
+          onPress={handlePickDocument}
+        >
+          <Text style={styles.attachIcon}>📎</Text>
+        </TouchableOpacity>
+        
         <View style={styles.inputWrapper}>
           <TextInput
             style={styles.input}
@@ -584,6 +626,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bgPrimary,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: layout.marginHorizontal,
+    paddingVertical: spacing.md,
+    paddingTop: spacing.xl,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.bgSecondary,
+  },
+  backButton: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
+  backButtonText: {
+    fontSize: typography.sizeBody,
+    color: colors.primary,
+    fontWeight: typography.weightMedium,
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: typography.weightBold,
+  },
+  headerSpacer: {
+    width: 60,
   },
   quoteContainer: {
     paddingHorizontal: layout.marginHorizontal,
@@ -649,8 +719,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: layout.marginHorizontal,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.lg + spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xl * 2,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.bgSecondary,
@@ -658,17 +728,17 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    minHeight: 80,
-    maxHeight: 200,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
+    minHeight: 100,
+    maxHeight: 240,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
     fontSize: typography.sizeBody,
     fontFamily: typography.fontFamily,
     color: colors.textPrimary,
     backgroundColor: colors.bgPrimary,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 8,
+    borderRadius: 12,
     textAlignVertical: 'top',
   },
   inputWrapper: {
@@ -784,6 +854,18 @@ const styles = StyleSheet.create({
   },
   micIcon: {
     fontSize: 18,
+  },
+  attachButton: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 18,
+    backgroundColor: colors.bgTertiary,
+    marginRight: spacing.xs,
+  },
+  attachIcon: {
+    fontSize: 20,
   },
   debugOverlay: {
     position: 'absolute',

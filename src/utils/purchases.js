@@ -34,6 +34,10 @@ export const initializePurchases = async (userId) => {
 // Check if user has Pro subscription
 export const checkProStatus = async () => {
   try {
+    // TEMPORARY: Enable Pro for all users during testing/demo
+    // Remove this after configuring RevenueCat properly
+    return true;
+    
     // On web, return false (free tier) for testing
     if (Platform.OS === 'web') {
       return false;
@@ -44,7 +48,7 @@ export const checkProStatus = async () => {
     return hasPro;
   } catch (error) {
     console.error('Error checking Pro status:', error);
-    return false; // Default to free tier on error
+    return true; // Default to Pro during demo
   }
 };
 
