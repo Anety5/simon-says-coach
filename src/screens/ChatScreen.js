@@ -72,7 +72,6 @@ export default function ChatScreen({ navigation, route }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [attachedDocument, setAttachedDocument] = useState(null);
-  const [showDebugInfo, setShowDebugInfo] = useState(true);
   const scrollViewRef = useRef(null);
   const recognitionRef = useRef(null);
   const authRetryCount = useRef(0);
@@ -483,24 +482,6 @@ export default function ChatScreen({ navigation, route }) {
         </Text>
         <View style={styles.headerSpacer} />
       </View>
-
-      {/* Debug Info Overlay - Shows API status */}
-      {showDebugInfo && (
-        <TouchableOpacity 
-          style={styles.debugOverlay}
-          onPress={() => setShowDebugInfo(false)}
-        >
-          <Text variant="tiny" style={styles.debugText}>
-            🔍 Debug Info (tap to hide)
-          </Text>
-          <Text variant="tiny" style={styles.debugText}>
-            API Key: {apiKey ? '✅ Loaded' : '❌ NOT FOUND'}
-          </Text>
-          <Text variant="tiny" style={styles.debugText}>
-            Messages: {messages.length} | Loading: {isLoading ? 'Yes' : 'No'}
-          </Text>
-        </TouchableOpacity>
-      )}
       
       {/* Inspirational Quote Header */}
       <View style={styles.quoteContainer}>
@@ -866,21 +847,5 @@ const styles = StyleSheet.create({
   },
   attachIcon: {
     fontSize: 20,
-  },
-  debugOverlay: {
-    position: 'absolute',
-    top: spacing.sm,
-    left: spacing.sm,
-    right: spacing.sm,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    padding: spacing.sm,
-    borderRadius: 8,
-    zIndex: 1000,
-  },
-  debugText: {
-    color: '#00ff00',
-    fontFamily: 'monospace',
-    fontSize: 10,
-    marginBottom: 2,
   },
 });
