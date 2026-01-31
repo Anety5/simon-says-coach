@@ -32,19 +32,38 @@ When I experimented with AI chatbots like ChatGPT, I saw the potential - but the
 
 ## What I Learned Building This
 
-1. **Prompt engineering is a craft** - Each coach personality required 20+ iterations to get the tone and methodology right
-2. **Freemium balance is hard** - Too restrictive and users churn, too generous and nobody converts
-3. **Voice UX changes everything** - Text feels like work, voice feels like conversation
-4. **Mobile-first matters** - People need coaching when they're stuck, not when they're at a desk
-5. **Multimodal is the future** - Being able to upload a screenshot and say "help me fix this" is magical
+### Technical Discoveries
+
+1. **React Native ≠ Web**: The biggest lesson came mid-development - HTML elements and Web APIs don't work on React Native mobile. This forced a complete architectural pivot from web-compatible to native-first design.
+
+2. **Native components are better anyway**: After converting all HTML (`<select>`, `<input type="range">`) to React Native components (TouchableOpacity, TextInput), the UX improved dramatically. Native buttons feel more responsive and fit the platform better.
+
+3. **Debugging without USB is challenging**: Testing via manual APK transfer taught me to build visibility into the app itself - on-screen debug overlays, comprehensive error messages, and extensive logging.
+
+4. **Null safety matters**: The "cannot read property 'name' of null" error taught me to implement defensive programming everywhere. Every object access now has optional chaining (`userProfile?.name`) and fallback values.
+
+5. **Build processes are complex**: Metro bundling, Gradle builds, APK signing, AAB generation - each step has its own quirks. Understanding the full pipeline from code to installable app was essential.
+
+### Product Insights
+
+1. **Prompt engineering is a craft**: Each coach personality required 20+ iterations to get the tone and methodology right. The difference between "helpful" and "annoying" is subtle.
+
+2. **Freemium balance is hard**: Decided to enable Pro for all users during demo phase rather than risk a bad first impression with artificial limits.
+
+3. **Context personalization works**: Users respond better when the AI uses their name, profession, and focus area. Generic responses feel robotic.
+
+4. **Mobile-first matters**: People need coaching when they're stuck, not when they're at a desk. Mobile is the right platform for this use case.
+
+5. **Simplicity > Features**: Better to have 6 working coaches than 12 half-baked ones. Focus on core value first.
 
 ## Tech Challenges Solved
 
-- **API resilience**: Implemented exponential backoff with jitter to handle rate limits gracefully
-- **Cross-platform voice**: Web Speech API works differently across browsers - built fallback detection
-- **Firebase security**: Crafted rules that allow anonymous auth while protecting user data
-- **Freemium metering**: Daily message limits that reset cleanly across time zones
-- **Context compression**: Balancing conversation history depth with API token costs
+- **React Native Conversion**: Replaced all HTML elements with native components in under 24 hours
+- **API Error Handling**: Implemented null-safe response parsing with specific error messages
+- **UX Polish**: Fixed input sizing (100px min), navigation (menu button), and visual feedback
+- **Build Pipeline**: Successfully generated release APK (67.3 MB) and AAB (46.5 MB) for Play Store
+- **Git Workflow**: Managed rapid iteration with clear commits and comprehensive documentation
+- **Deadline Pressure**: Delivered functional MVP with 3 days from crisis to submission
 
 ## Vision for the Future
 
@@ -66,9 +85,15 @@ I'm fascinated by **AI-augmented productivity** and **human-centered design**. P
 If you're building something in this space or want to collaborate, reach out!
 
 - **GitHub**: https://github.com/Anety5
-- **Project**: https://github.com/Anety5/simon-says-coach
-- **Live Demo**: https://simon-says-coach.web.app
+- **Project Repository**: https://github.com/Anety5/simon-says-coach
+- **Email**: support@lavarocklabs.com
 
 ---
 
-*Built for the Devpost AI Challenge 2026. A solo project from concept to code in 2 weeks.*
+*Built for the Devpost AI Challenge. A solo project from concept to code with a critical pivot mid-development. Total build time: ~3 weeks including the HTML-to-native rewrite.*
+
+**Version 1.0.0** released January 30, 2026
+- Android APK: 67.3 MB
+- Android AAB: 46.5 MB  
+- 6 AI coaching personalities powered by Google Gemini 2.5 Flash
+- Fully native React Native implementation

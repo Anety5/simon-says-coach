@@ -1,54 +1,82 @@
 # Simon Says AI Coach - Technical Documentation
 
+## How We Built It
+
+### The Journey: Web to Native
+
+Simon Says Coach started with an ambitious goal: create a cross-platform AI coaching app using React Native that could run on web, iOS, and Android. However, mid-development we discovered a critical challenge that reshaped our entire architecture.
+
+**The Discovery**
+After building the onboarding flow with HTML elements (`<select>` dropdowns, `<input type="range">` sliders), we hit a wall when testing on Android: **HTML elements don't work in React Native mobile apps**. The app crashed immediately after the homepage loaded.
+
+**The Pivot**
+With only 3 days until our Devpost submission deadline, we made the decision to:
+1. **Go Android-native first** - Focus on React Native mobile (not web)
+2. **Complete rewrite** - Replace every HTML element with native React Native components
+3. **Disable incompatible features** - Web Speech API doesn't exist on React Native
+
+**The Conversion**
+- **ContextEntryScreen**: `<select>` profession dropdown → TouchableOpacity button grid (12 professions)
+- **ToneSelectionScreen**: `<input type="range">` sliders → 5 numbered buttons for each scale
+- **ChatScreen**: `<input type="file">` → expo-document-picker native file picker
+- **SettingsScreen**: All HTML inputs → TouchableOpacity native buttons
+- **Voice features**: Web Speech API → Disabled (users can use keyboard mic, native voice planned)
+
+**The Result**
+A fully functional Android app with native UX, better performance, and a clear path forward. While we lost web compatibility in the MVP, we gained a polished mobile experience and valuable lessons about React Native architecture.
+
 ## Technology Stack
 
 ### Frontend
-- **React Native (0.81.5)** - Cross-platform mobile/web framework
-- **Expo (SDK 54)** - Development toolchain and native module access
+- **React Native (0.81.5)** - Native mobile app framework (Android)
+- **Expo (SDK ~54.0.31)** - Development toolchain and native module access
 - **React Navigation** - Screen routing and navigation
 - **AsyncStorage** - Local data persistence for user preferences and message counts
+- **expo-document-picker (14.0.8)** - Native file attachment support
 
 ### AI & Backend Services
-- **Google Gemini 2.5 Flash API** - Multimodal AI model (text + image inputs)
-- **Firebase Authentication** - Anonymous user authentication
-- **Firebase Firestore** - Cloud database for user profiles and conversation history
-- **Firebase Hosting** - Web app deployment (https://simon-says-coach.web.app)
+- **Google Gemini 2.5 Flash API** - AI coaching via REST API (text generation)
+- **Firebase (12.8.0)** - Authentication and Firestore database
+- **Firebase Hosting** - Privacy policy and support pages hosting
 
 ### Monetization
-- **RevenueCat** - Subscription management and payment processing
-- **Platform-aware implementation** - Native SDK on mobile, mock mode on web
+- **RevenueCat (9.x)** - Subscription management configured
+- **Product ID**: simon_says_pro_monthly ($9.99/month)
+- **Current Status**: Pro features enabled for all users during demo phase
 
-### Development Tools
-- **Git/GitHub** - Version control
+### Build Tools
+- **Metro Bundler** - JavaScript bundler for React Native
+- **Android Gradle Build System** - APK/AAB generation
+- **Git/GitHub** - Version control (https://github.com/Anety5/simon-says-coach)
 - **Visual Studio Code** - IDE
-- **Expo CLI** - Build and export tooling
 
 ## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                     CLIENT LAYER                        │
-│  React Native App (iOS/Android) + Web App (Browser)    │
+│  React Native Android App (Native Components Only)     │
 │                                                         │
-│  Components:                                            │
+│  Screens (TouchableOpacity-based navigation):          │
 │  - WelcomeScreen → ContextEntryScreen →                │
 │    ToneSelectionScreen → CoachLibraryScreen →          │
 │    ChatScreen                                           │
 │                                                         │
 │  State Management:                                      │
-│  - AsyncStorage (local)                                 │
+│  - AsyncStorage (local persistence)                     │
 │  - React hooks (useState, useEffect)                    │
+│  - Navigation state (React Navigation)                  │
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
 │                   UTILITY LAYER                         │
 │                                                         │
 │  src/utils/                                             │
-│  - gemini.js: AI request handling + retry logic         │
-│  - firestore.js: Database operations                    │
-│  - auth.js: Anonymous authentication                    │
-│  - voice.js: Speech-to-text, text-to-speech             │
-│  - purchases.js: Subscription management                │
+│  - gemini.js: AI REST API + null-safe error handling    │
+│  - firestore.js: Database operations (simplified)       │
+│  - auth.js: Anonymous authentication (simplified)       │
+│  - voice.js: DISABLED (React Native incompatibility)    │
+│  - purchases.js: Pro enabled for all (demo mode)        │
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
@@ -57,16 +85,16 @@
 │  Google Gemini API                                      │
 │  - Model: gemini-2.5-flash                              │
 │  - Context: Conversation history + system prompts       │
-│  - Features: Text generation, image analysis            │
+│  - Features: Text generation (images planned)           │
 │                                                         │
 │  Firebase (simon-says-coach project)                    │
-│  - Firestore: users/, conversations/, messages/         │
-│  - Auth: Anonymous sign-in                              │
-│  - Hosting: Static web build                            │
+│  - Firestore: Simplified for demo                       │
+│  - Auth: Simplified anonymous auth                      │
+│  - Hosting: Privacy policy deployment                   │
 │                                                         │
 │  RevenueCat                                             │
-│  - SKU: simon_says_pro_monthly ($9.99)                  │
-│  - Entitlement: "pro" feature access                    │
+│  - Product: simon_says_pro_monthly ($9.99)              │
+│  - Status: Configured, not yet active (demo mode)       │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -106,79 +134,89 @@ const COACH_PROMPTS = {
 ### 2. Multimodal Input
 
 **Text Input**
-- Standard chat interface with 500 character limit
-- Real-time typing indicator
-- Message persistence to Firestore
+- Native React Native TextInput component
+- 500 character limit with counter display
+- Message persistence to local AsyncStorage
+- Real-time UI feedback
 
-**Voice Input (Pro feature)**
-- Web Speech API for speech-to-text
-- Browser-based (Chrome, Edge, Safari)
-- Real-time transcription displayed in input field
+**Document Attachments (New Feature)**
+- expo-document-picker for native file selection
+- Supports PDF, images, and text documents
+- Attachment button (📎) integrated in chat input
+- Files prepared for Gemini API context (implementation in progress)
 
-**Image Upload**
-- File upload via browser input
-- Base64 encoding for API transmission
-- Sent to Gemini with text prompt for context analysis
-- Use cases: Screenshots of workflows, task lists, diagrams
+**Voice Input (Temporarily Disabled)**
+- Web Speech API incompatible with React Native mobile
+- Users can use Android keyboard's built-in microphone button (OS-level speech-to-text)
+- Native voice input planned for future release using expo-speech
 
-**Voice Output (Pro feature)**
-- Web Speech Synthesis API for text-to-speech
-- Auto-plays coach responses when enabled
-- Configurable rate, pitch, volume
+**Image Upload (Planned)**
+- Future integration with Gemini's vision capabilities
+- Document picker already supports image selection
+- Will enable screenshots, diagrams, workflow analysis
+
+**Voice Output (Temporarily Disabled)**
+- Web Speech Synthesis API incompatible with React Native
+- Native text-to-speech planned for future release using expo-speech
 
 ### 3. User Experience Flow
 
 ```
 1. WelcomeScreen
    ↓
-2. ContextEntryScreen
-   - Name input
-   - Profession input
-   - Current focus area (text area)
+2. ContextEntryScreen (Native Components)
+   - Name input (TextInput)
+   - Profession selection (TouchableOpacity button grid, replaced <select>)
+   - Current focus area (TextInput multiline)
    ↓
-3. ToneSelectionScreen
-   - Formality slider (1-5)
-   - Directness slider (1-5)
-   - Detail slider (1-5)
+3. ToneSelectionScreen (Native Components)
+   - Formality buttons (1-5, replaced <input type="range">)
+   - Directness buttons (1-5, replaced <input type="range">)
+   - Detail buttons (1-5, replaced <input type="range">)
    ↓
 4. CoachLibraryScreen
    - 6 coach cards with descriptions
    - Animated selection feedback
+   - "☰ Menu" navigation button
    ↓
 5. ChatScreen
    - Message thread (coach + user)
    - Quote at top (motivational)
-   - Input area with voice/image buttons
-   - Message counter (free: 20/day)
+   - Input area (100px min height, proper padding)
+   - Document attachment button (📎)
+   - "☰ Menu" header button → returns to library
+   - Debug overlay (API status, message count)
 ```
 
 ### 4. Freemium Implementation
 
-**Message Limiting**
+**Current Status: Demo Mode**
+- Pro features enabled for all users during testing phase
+- Message limiting temporarily disabled for better user experience
+- RevenueCat configured but not enforcing restrictions
+
+**Message Limiting (Planned)**
 ```javascript
-// Tracked via AsyncStorage
+// Will be tracked via AsyncStorage
 {
   date: "Sat Jan 25 2026",
   count: 15 // Resets daily
 }
 ```
 
-**Pro Features Gating**
-- Voice input: `if (!isPro) return;`
-- Voice output: `if (!isPro) return;`
-- Image upload: Available to all (for demo purposes)
-- Unlimited messages: No counter check for Pro users
+**Pro Features Design**
+- Unlimited messages: No daily counter for Pro users
+- Voice input: Planned with expo-speech (native implementation)
+- Voice output: Planned with expo-speech (native text-to-speech)
+- Document attachments: Currently available to all (will be Pro-gated)
+- Full conversation history: AsyncStorage-based persistence
 
 **RevenueCat Integration**
 ```javascript
-// Platform detection
-if (Platform.OS === 'web') {
-  // Mock mode - free tier only
-  return false;
-} else {
-  // Native mode - check entitlements
-  const hasPro = customerInfo.entitlements.active['pro'];
-}
+// checkProStatus() in src/utils/purchases.js
+// TEMPORARY: Returns true for all users
+// Future: Will check entitlements via RevenueCat SDK
+const hasPro = customerInfo.entitlements.active['pro'];
 ```
 
 ## Database Schema (Firestore)
@@ -257,33 +295,48 @@ service cloud.firestore {
 
 ## Deployment
 
-### Web (Firebase Hosting)
+### Android (Primary Platform)
+
+**Release APK** (Direct install)
 ```bash
-# Build static web bundle
-npx expo export -p web
-
-# Deploy to Firebase
-firebase deploy --only hosting
-
-# Live URL
-https://simon-says-coach.web.app
-```
-
-### Android (APK)
-```bash
-# Generate native Android project
-npx expo prebuild --platform android
+# Navigate to Android project
+cd android
 
 # Build release APK
-cd android
-.\gradlew assembleRelease
+.\gradlew.bat assembleRelease
 
-# Output location
+# Output location (67.3 MB)
 android/app/build/outputs/apk/release/app-release.apk
 ```
 
+**Release AAB** (Google Play Console)
+```bash
+# Build App Bundle for Play Store
+.\gradlew.bat bundleRelease
+
+# Output location (46.5 MB)
+android/app/build/outputs/bundle/release/app-release.aab
+```
+
+**Build Details**
+- Last successful build: Jan 30, 2026 10:00 PM
+- Gradle tasks: 462 (45 executed, 417 up-to-date)
+- Metro bundler: 649 modules in 4896ms
+- Build time: 46 seconds
+
+### Firebase Hosting (Privacy Policy & Support)
+```bash
+# Deploy static pages
+firebase deploy --only hosting
+
+# Hosted pages:
+# - public/privacy-policy.html
+# - public/support.html
+# - public/terms-of-service.html
+```
+
 ### iOS (Future)
-- Requires Apple Developer account
+- Requires Apple Developer account ($99/year)
 - Build via Expo EAS Build or Xcode
 - TestFlight for beta distribution
 
@@ -308,46 +361,99 @@ android/app/build/outputs/apk/release/app-release.apk
 
 ### Gemini API Errors
 ```javascript
+// src/utils/gemini.js - Null-safe response parsing
 try {
   const response = await generateCoachResponse(...);
+  
+  // Check for valid response structure
+  if (!data.candidates || !candidate.content.parts) {
+    throw new Error("Invalid response structure");
+  }
 } catch (error) {
-  if (error.status === 429) {
-    // Rate limit - retry with backoff
-  } else if (error.status === 401) {
-    // Auth error - don't retry
+  if (error.message.includes('API key not found')) {
+    return "API key configuration error";
+  } else if (error.message.includes('Network connection')) {
+    return "Please check your internet connection";
   } else {
-    // Fallback message
+    // Log actual error for debugging
+    console.error('Gemini error:', error);
     return "I apologize, I'm having trouble...";
   }
 }
 ```
 
+### User Profile Null Safety
+```javascript
+// Fixed "cannot read property 'name' of null" error
+const userName = userProfile?.name || 'there';
+const profession = userProfile?.profession || '';
+const focusArea = userProfile?.focus || '';
+
+// Safe null checks throughout gemini.js
+if (userProfile && userProfile.name) {
+  // Use profile data
+}
+```
+
 ### Firebase Permission Errors
 ```javascript
+// Simplified auth for demo - graceful degradation
 catch (error) {
   if (error.code === 'permission-denied') {
-    console.warn('Running in demo mode');
+    console.warn('Running in simplified demo mode');
   }
 }
 ```
 
+### Debug Overlay
+- On-screen API status indicator (✅ Loaded / ❌ Missing)
+- Message count display for testing
+- Loading state visibility
+- Actual API key hidden for security
+
 ## Future Technical Enhancements
 
-1. **Real-time messaging** - WebSocket connection for streaming responses
-2. **Offline mode** - Service workers for web, SQLite for mobile
-3. **Analytics** - Mixpanel/Amplitude for user behavior tracking
-4. **A/B testing** - Firebase Remote Config for feature flags
-5. **Push notifications** - Daily coaching prompts and check-ins
-6. **Voice cloning** - Unique voice per coach personality (ElevenLabs API)
+1. **Native Voice Integration** - expo-speech for text-to-speech and speech recognition
+2. **Image Analysis** - Gemini vision API for screenshot/document analysis
+3. **Offline Mode** - SQLite for local message storage, sync on reconnect
+4. **Analytics** - Mixpanel/Amplitude for user behavior tracking
+5. **Push Notifications** - expo-notifications for daily coaching prompts
+6. **Real-time Messaging** - Streaming responses from Gemini API
+7. **Firebase Auth** - Full authentication with email/social sign-in
+8. **RevenueCat Activation** - Enable subscription enforcement and payment processing
+9. **Conversation Export** - PDF/markdown export of coaching sessions
+10. **Multi-language Support** - i18n implementation for global reach
+
+## Known Issues & Limitations (v1.0.0)
+
+1. **Voice Features Disabled**: Web Speech API incompatible with React Native mobile
+   - Workaround: Users can use Android keyboard microphone (OS-level)
+   - Planned: Native voice implementation with expo-speech
+
+2. **Pro Features Enabled for All**: RevenueCat not enforcing restrictions
+   - Temporary for demo/testing phase
+   - Will be activated before public launch
+
+3. **Simplified Firebase**: Auth and Firestore simplified for MVP
+   - No user accounts (anonymous only)
+   - Message history stored locally via AsyncStorage
+
+4. **No iOS Build**: Android-only for initial release
+   - iOS requires Apple Developer account
+   - Planned for future release
+
+5. **Document Attachments**: UI implemented but not fully integrated with Gemini
+   - File picker functional
+   - API integration in progress
 
 ## Development Setup
 
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
-- Expo CLI (`npm install -g expo-cli`)
-- Firebase CLI (`npm install -g firebase-tools`)
 - Android Studio (for Android builds)
+- Java Development Kit (JDK) 17+
+- Git
 
 ### Installation
 ```bash
@@ -358,20 +464,76 @@ cd simon-says-coach
 # Install dependencies
 npm install
 
-# Create .env file
-echo "EXPO_PUBLIC_GEMINI_API_KEY=your_key_here" > .env
-echo "EXPO_PUBLIC_REVENUECAT_API_KEY=your_key_here" >> .env
+# Note: .env file with API keys required (not in repo)
+# EXPO_PUBLIC_GEMINI_API_KEY=your_key_here
+# EXPO_PUBLIC_REVENUECAT_API_KEY=your_key_here
 
 # Start development server
 npm start
 ```
 
+### Running on Device
+```bash
+# Start Metro bundler
+npm start
+
+# In another terminal, build and run on Android
+cd android
+.\gradlew.bat assembleDebug
+# Install APK manually via USB or adb
+```
+
+### Key Development Learnings
+
+**React Native vs Web**
+- React Native mobile apps CANNOT use HTML elements (<select>, <input type="range">, <input type="file">)
+- Must use React Native components only: TouchableOpacity, TextInput, ScrollView, etc.
+- Web APIs (window, document, localStorage, Web Speech API) are not available
+- Use native modules from Expo ecosystem (expo-document-picker, expo-speech, etc.)
+
+**Architecture Pivot**
+- Original design used web-compatible components for cross-platform deployment
+- Mid-development discovery: HTML incompatible with React Native mobile
+- Complete rewrite: All HTML → React Native native components
+- Result: Better performance and native UX, but Android-only for MVP
+
+**Testing Without USB Debugging**
+- Manual APK transfer for testing (no direct device debugging)
+- Added on-screen debug overlay for visibility
+- Comprehensive error messages in UI (not just console logs)
+- Iterative build-test-rebuild cycles
+
 ### Testing
-- Web: Press `w` in Expo CLI
-- Android: Press `a` (requires emulator or device)
-- iOS: Press `i` (requires macOS + Xcode)
+- Android: Build release APK and install manually
+- Debugging: Check Metro bundler logs and on-screen debug overlay
+- API Testing: Gemini responses logged to console (first 200 chars)
 
 ## Contact & Support
 
-GitHub: https://github.com/Anety5/simon-says-coach
-Live Demo: https://simon-says-coach.web.app
+- **GitHub**: https://github.com/Anety5/simon-says-coach
+- **Email**: support@lavarocklabs.com
+- **Privacy Policy**: (hosting at Firebase, URL pending)
+- **Version**: 1.0.0 (Released Jan 30, 2026)
+
+## Release Information
+
+**Current Build**
+- APK Size: 67.3 MB
+- AAB Size: 46.5 MB
+- Target SDK: Android API 34
+- Minimum SDK: Android API 24 (Android 7.0+)
+
+**What's New in v1.0.0**
+- 6 specialized AI coaching personalities (Productivity, Strategy, Growth, Focus, Wellness, Creative)
+- Customizable coaching tone (formality, directness, detail level)
+- Document attachment support (📎 button in chat)
+- Improved input UX (larger input box, proper padding)
+- Menu navigation system (prevents accidental app closure)
+- On-screen debug overlay for testing
+- Null-safe error handling throughout
+
+**Known Issues**
+- Voice input/output temporarily disabled (native implementation planned)
+- Pro features enabled for all users (RevenueCat activation pending)
+- Document attachments UI complete but API integration in progress
+- Firebase auth simplified for demo (full auth planned)
