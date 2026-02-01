@@ -98,7 +98,7 @@ export default function ChatScreen({ navigation, route }) {
     if (scrollViewRef.current) {
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+      }, 800);
     }
     
     // Auto-play coach responses if voice is enabled
@@ -475,11 +475,14 @@ export default function ChatScreen({ navigation, route }) {
           style={styles.backButton}
           onPress={() => navigation.navigate('library')}
         >
-          <Text style={styles.backButtonText}>☰ Menu</Text>
+          <Text style={styles.backButtonText}>☰</Text>
         </TouchableOpacity>
-        <Text variant="h3" style={styles.headerTitle}>
-          {coachType.charAt(0).toUpperCase() + coachType.slice(1)} Coach
-        </Text>
+        <View style={styles.headerCenter}>
+          <Text variant="h3" style={styles.headerTitle}>Simon Says</Text>
+          <Text variant="small" style={styles.headerSubtitle}>
+            {coachType.charAt(0).toUpperCase() + coachType.slice(1)} Coach
+          </Text>
+        </View>
         <View style={styles.headerSpacer} />
       </View>
       
@@ -622,19 +625,31 @@ const styles = StyleSheet.create({
   backButton: {
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
+    width: 40,
+    alignItems: 'center',
   },
   backButtonText: {
-    fontSize: typography.sizeBody,
+    fontSize: 24,
     color: colors.primary,
     fontWeight: typography.weightMedium,
   },
-  headerTitle: {
+  headerCenter: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
     textAlign: 'center',
     fontWeight: typography.weightBold,
+    marginBottom: 2,
+  },
+  headerSubtitle: {
+    textAlign: 'center',
+    color: colors.textSecondary,
+    fontSize: typography.sizeSmall,
   },
   headerSpacer: {
-    width: 60,
+    width: 40,
   },
   quoteContainer: {
     paddingHorizontal: layout.marginHorizontal,
