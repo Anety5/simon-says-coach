@@ -40,9 +40,10 @@ A fully functional Android app with native UX, better performance, and a clear p
 - **Firebase Hosting** - Privacy policy and support pages hosting
 
 ### Monetization
-- **RevenueCat (9.x)** - Subscription management configured
+- **RevenueCat (9.x)** - Subscription management fully integrated
 - **Product ID**: simon_says_pro_monthly ($9.99/month)
-- **Current Status**: Pro features enabled for all users during demo phase
+- **API Key**: goog_gUkuLkUlzCQvCCeuJPDSSOijsKS (Google Play)
+- **Current Status**: 20 message/day free tier actively enforced
 
 ### Build Tools
 - **Metro Bundler** - JavaScript bundler for React Native
@@ -190,10 +191,10 @@ const COACH_PROMPTS = {
 
 ### 4. Freemium Implementation
 
-**Current Status: Demo Mode**
-- Pro features enabled for all users during testing phase
-- Message limiting temporarily disabled for better user experience
-- RevenueCat configured but not enforcing restrictions
+**Current Status: Fully Operational**
+- 20 message/day limit actively enforced for free users
+- RevenueCat integrated with Google Play billing
+- Product configured and ready for subscription purchases
 
 **Message Limiting (Planned)**
 ```javascript
@@ -214,9 +215,12 @@ const COACH_PROMPTS = {
 **RevenueCat Integration**
 ```javascript
 // checkProStatus() in src/utils/purchases.js
-// TEMPORARY: Returns true for all users
-// Future: Will check entitlements via RevenueCat SDK
-const hasPro = customerInfo.entitlements.active['pro'];
+// ACTIVE: Checks entitlements via RevenueCat SDK
+const hasPro = customerInfo.entitlements.active['pro'] !== undefined;
+if (hasPro) {
+  // Unlimited messages for Pro users
+}
+// Falls back to false on error (shows paywall)
 ```
 
 ## Database Schema (Firestore)
@@ -319,10 +323,11 @@ android/app/build/outputs/bundle/release/app-release.aab
 ```
 
 **Build Details**
-- Last successful build: Jan 30, 2026 10:00 PM
-- Gradle tasks: 462 (45 executed, 417 up-to-date)
-- Metro bundler: 649 modules in 4896ms
-- Build time: 46 seconds
+- Last successful build: Jan 31, 2026 1:49 PM
+- Version: 1.0.2 (versionCode 3)
+- Gradle tasks: 462 (54 executed, 369 up-to-date)
+- Build time: ~30 seconds
+- Production signed with release keystore
 
 ### Firebase Hosting (Privacy Policy & Support)
 ```bash
@@ -424,17 +429,13 @@ catch (error) {
 9. **Conversation Export** - PDF/markdown export of coaching sessions
 10. **Multi-language Support** - i18n implementation for global reach
 
-## Known Issues & Limitations (v1.0.0)
+## Known Issues & Limitations (v1.0.2)
 
 1. **Voice Features Disabled**: Web Speech API incompatible with React Native mobile
    - Workaround: Users can use Android keyboard microphone (OS-level)
    - Planned: Native voice implementation with expo-speech
 
-2. **Pro Features Enabled for All**: RevenueCat not enforcing restrictions
-   - Temporary for demo/testing phase
-   - Will be activated before public launch
-
-3. **Simplified Firebase**: Auth and Firestore simplified for MVP
+2. **Simplified Firebase**: Auth and Firestore simplified for MVP
    - No user accounts (anonymous only)
    - Message history stored locally via AsyncStorage
 
@@ -513,17 +514,25 @@ cd android
 - **GitHub**: https://github.com/Anety5/simon-says-coach
 - **Email**: support@lavarocklabs.com
 - **Privacy Policy**: (hosting at Firebase, URL pending)
-- **Version**: 1.0.0 (Released Jan 30, 2026)
+- **Version**: 1.0.2 (Released Jan 31, 2026)
 
 ## Release Information
 
 **Current Build**
 - APK Size: 67.3 MB
-- AAB Size: 46.5 MB
-- Target SDK: Android API 34
+- AAB Size: 48.7 MB
+- Version: 1.0.2 (versionCode 3)
+- Target SDK: Android API 36
 - Minimum SDK: Android API 24 (Android 7.0+)
+- Google Play: Open Testing track published
 
-**What's New in v1.0.0**
+**What's New in v1.0.2**
+- RevenueCat fully integrated with Google Play billing
+- 20 message/day free tier enforcement active
+- Production release signing configured
+- Google Play Open Testing track live
+
+**What's in v1.0.0-1.0.2**
 - 6 specialized AI coaching personalities (Productivity, Strategy, Growth, Focus, Wellness, Creative)
 - Customizable coaching tone (formality, directness, detail level)
 - Document attachment support (📎 button in chat)
@@ -534,6 +543,5 @@ cd android
 
 **Known Issues**
 - Voice input/output temporarily disabled (native implementation planned)
-- Pro features enabled for all users (RevenueCat activation pending)
 - Document attachments UI complete but API integration in progress
 - Firebase auth simplified for demo (full auth planned)

@@ -92,8 +92,10 @@ If you're building something in this space or want to collaborate, reach out!
 
 *Built for the Devpost AI Challenge. A solo project from concept to code with a critical pivot mid-development. Total build time: ~3 weeks including the HTML-to-native rewrite.*
 
-**Version 1.0.0** released January 30, 2026
+**Version 1.0.2** released January 31, 2026
 - Android APK: 67.3 MB
-- Android AAB: 46.5 MB  
+- Android AAB: 48.7 MB  
 - 6 AI coaching personalities powered by Google Gemini 2.5 Flash
 - Fully native React Native implementation
+- RevenueCat subscription management integrated
+- Google Play Open Testing live
