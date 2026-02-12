@@ -237,6 +237,18 @@ export default function SettingsScreen({ navigation }) {
             </View>
           </View>
         )}
+
+        {/* Developer Tools (Debug Mode) */}
+        {__DEV__ && (
+          <View style={styles.section}>
+            <Text variant="tiny" style={styles.sectionLabel}>DEVELOPER</Text>
+            <Button
+              title="🔧 RevenueCat Debug Tools"
+              onPress={() => navigation.navigate('revenuecatDebug')}
+              variant="secondary"
+            />
+          </View>
+        )}
       </ScrollView>
 
       {/* Save Button */}

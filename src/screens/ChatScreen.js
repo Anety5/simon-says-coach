@@ -94,12 +94,8 @@ export default function ChatScreen({ navigation, route }) {
   }, []);
 
   useEffect(() => {
-    // Auto-scroll to bottom when messages change
-    if (scrollViewRef.current) {
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 800);
-    }
+    // Disabled auto-scroll for better readability
+    // Users can scroll manually to read at their own pace
     
     // Auto-play coach responses if voice is enabled
     if (voiceEnabled && messages.length > 0) {
@@ -523,8 +519,9 @@ export default function ChatScreen({ navigation, route }) {
             >
               <Text 
                 variant="body" 
-                style={styles.messageText}
-                color={message.role === 'user' ? colors.textPrimary : colors.textPrimary}
+                style={[styles.messageText, {
+                  color: message.role === 'user' ? '#FFFFFF' : '#1F2937'
+                }]}
               >
                 {message.text}
               </Text>
@@ -682,12 +679,12 @@ const styles = StyleSheet.create({
   },
   messagesContent: {
     paddingHorizontal: layout.marginHorizontal,
-    paddingVertical: spacing.md,
-    gap: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xl,
   },
   messageRow: {
     flexDirection: 'row',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
   messageRowCoach: {
     justifyContent: 'flex-start',
@@ -696,20 +693,26 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   messageBubble: {
-    maxWidth: '80%',
-    padding: spacing.sm,
-    borderRadius: 2,
+    maxWidth: '85%',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderRadius: 16,
+    marginBottom: spacing.xs,
   },
   messageBubbleCoach: {
-    backgroundColor: 'transparent',
+    backgroundColor: '#F3F4F6',
     alignItems: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   messageBubbleUser: {
-    backgroundColor: colors.bgTertiary,
+    backgroundColor: colors.primary,
     alignItems: 'flex-end',
   },
   messageText: {
+    fontSize: typography.sizeBody,
     lineHeight: typography.lineHeightRelaxed * typography.sizeBody,
+    letterSpacing: 0.2,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -724,18 +727,18 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    minHeight: 100,
-    maxHeight: 240,
+    minHeight: 44,
+    maxHeight: 120,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     fontSize: typography.sizeBody,
     fontFamily: typography.fontFamily,
     color: colors.textPrimary,
-    backgroundColor: colors.bgPrimary,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    textAlignVertical: 'top',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    borderRadius: 24,
+    textAlignVertical: 'center',
   },
   inputWrapper: {
     flex: 1,

@@ -42,7 +42,7 @@ A fully functional Android app with native UX, better performance, and a clear p
 ### Monetization
 - **RevenueCat (9.x)** - Subscription management fully integrated
 - **Product ID**: simon_says_pro_monthly ($9.99/month)
-- **API Key**: enter API key (Google Play)
+- **API Key**: Configured via environment variables (.env file)
 - **Current Status**: 20 message/day free tier actively enforced
 
 ### Build Tools

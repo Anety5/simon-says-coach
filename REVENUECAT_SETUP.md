@@ -46,19 +46,21 @@ EXPO_PUBLIC_REVENUECAT_API_KEY=goog_xxxxxxxxxxxxxx
 1. In RevenueCat dashboard → **Apps** → **+ New**
 2. Select **Google Play Store**
 3. Name: `Simon Says Coach Android`
-4. Bundle ID: `com.lavarocklabs.simonsayscoach` (or your chosen ID)
+4. Bundle ID: `com.anonymous.simonsayscoach` (MUST MATCH your package.json android.package)
 5. Click **Save**
+6. **IMPORTANT**: You'll need to upload your service account JSON from Google Play Console for app verification
 
 ### B. Create Product (Subscription)
 
 1. Go to **Products** tab
 2. Click **+ New**
 3. Configure:
-   - **Product ID**: `pro_monthly` (MUST match Google Play Console)
+   - **Product ID**: `simon_says_pro_monthly` (MUST match Google Play Console exactly!)
    - **Type**: Subscription
    - **Price**: $9.99 USD
    - **Duration**: 1 month
    - **Description**: "Simon Says Coach Pro - Unlimited coaching"
+4. Click **Save**
 
 ### C. Create Entitlement
 
@@ -77,39 +79,57 @@ EXPO_PUBLIC_REVENUECAT_API_KEY=goog_xxxxxxxxxxxxxx
 3. Configure:
    - **Identifier**: `default`
    - **Description**: "Default subscription offering"
+   - **Make this the current offering**: ✓ (checked)
 4. Click **Packages** → **+ Add Package**
-   - **Identifier**: `monthly`
-   - **Product**: `pro_monthly`
+   - **Identifier**: `monthly` (exactly this - the code looks for this!)
+   - **Product**: `simon_says_pro_monthly` (select from dropdown)
    - **Type**: Monthly
 5. Click **Save**
+6. **IMPORTANT**: Make sure "Current Offering" is set to "default"
 
 ---
 
 ## 🔧 Step 4: Configure Google Play Console
 
 ### A. Create Subscription Product in Play Console
-
-1. Go to https://play.google.com/console
-2. Select your app (or create new)
+Simon Says Coach)
 3. Navigate to **Monetize** → **Subscriptions**
 4. Click **Create subscription**
 5. Configure:
-   - **Product ID**: `pro_monthly` (MUST match RevenueCat)
-   - **Name**: Simon Says Coach Pro
+   - **Product ID**: `simon_says_pro_monthly` (MUST match what you see in your screenshot!)
+   - **Name**: Simon Says Pro Monthly
+   - **Description**: Unlock unlimited coaching sessions, all 6 coaches, custom coach creator, and voice responses
+   - **Billing period**: 1 month
+   - **Base plan**: $9.99 USD
+6. Click **Save** and **Activate** Coach Pro
    - **Description**: Unlock unlimited coaching sessions, all 6 coaches, custom coach creator, and voice responses
    - **Price**: $9.99 USD
    - **Billing period**: 1 month
    - **Free trial**: 7 days (optional)
 6. Click **Save**
 
-### B. Link RevenueCat to Google Play
+### B. Link RevenueCat to Google Play (Service Account Setup)
 
-1. In RevenueCat dashboard → **Project Settings** → **Service Credentials**
-2. Follow instructions to:
-   - Create Service Account in Google Cloud Console
-   - Download JSON key
-   - Upload to RevenueCat
-3. Grant **Google Play Developer API** permissions
+**⚠️ IMPORTANT: This step is complex and has a 36-hour activation time!**
+
+**Having Issues?** See the detailed troubleshooting guides:
+- 📋 **GOOGLE_PLAY_QUICKSTART.md** - Simple 5-step guide
+- 🔧 **GOOGLE_PLAY_SERVICE_ACCOUNT_SETUP.md** - Complete troubleshooting
+
+**Quick Summary:**
+1. Go to Google Cloud Console (use Play Console owner account ONLY)
+2. Enable Google Play Android Developer API
+3. Enable Google Play Developer Reporting API
+4. Create service account and download JSON key
+5. Add service account to Play Console with Admin permissions
+6. Upload JSON to RevenueCat
+7. **Wait 24-36 hours** for activation!
+
+**Common Issues:**
+- Multiple Google accounts → Use owner account only
+- Can't download JSON → Try different browser
+- API enable errors → Wrong project selected
+- "Invalid credentials" in RevenueCat → Normal for 36 hours
 
 ---
 
