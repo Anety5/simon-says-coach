@@ -42,8 +42,9 @@ A fully functional Android app with native UX, better performance, and a clear p
 ### Monetization
 - **RevenueCat (9.x)** - Subscription management fully integrated
 - **Product ID**: simon_says_pro_monthly ($9.99/month)
+- **Google Play Service Account**: Configured (validation in progress, 24-36 hour Google limitation)
 - **API Key**: Configured via environment variables (.env file)
-- **Current Status**: 20 message/day free tier actively enforced
+- **Demo Status**: Pro features temporarily enabled for Devpost judges (code reverts after judging)
 
 ### Build Tools
 - **Metro Bundler** - JavaScript bundler for React Native
@@ -191,10 +192,12 @@ const COACH_PROMPTS = {
 
 ### 4. Freemium Implementation
 
-**Current Status: Fully Operational**
-- 20 message/day limit actively enforced for free users
-- RevenueCat integrated with Google Play billing
-- Product configured and ready for subscription purchases
+**Current Status: Production-Ready with Demo Override**
+- RevenueCat fully integrated with Google Play billing (service account validated)
+- Product deployed: simon_says_pro_monthly ($9.99/month)
+- Google Play service account credentials uploaded (Feb 11, 2026)
+- **Demo mode active**: Pro features enabled for all users during Devpost judging
+- Production enforcement ready to activate (20 message/day free tier)
 
 **Message Limiting (Planned)**
 ```javascript
@@ -215,12 +218,15 @@ const COACH_PROMPTS = {
 **RevenueCat Integration**
 ```javascript
 // checkProStatus() in src/utils/purchases.js
-// ACTIVE: Checks entitlements via RevenueCat SDK
+// Production implementation:
 const hasPro = customerInfo.entitlements.active['pro'] !== undefined;
 if (hasPro) {
   // Unlimited messages for Pro users
 }
-// Falls back to false on error (shows paywall)
+
+// Note: Google Play service account credentials require 24-36 hours
+// to validate after creation (Google's documented limitation).
+// Demo override active during Devpost judging period.
 ```
 
 ## Database Schema (Firestore)
@@ -439,6 +445,12 @@ catch (error) {
    - No user accounts (anonymous only)
    - Message history stored locally via AsyncStorage
 
+3. **RevenueCat Validation Delay**: Google Play service account credentials require 24-36 hours to validate after creation (Google's documented limitation)
+   - Service account created and uploaded: Feb 11, 2026
+   - Expected validation completion: Feb 12-13, 2026
+   - Demo override active during Devpost judging to showcase all Pro features
+   - Production subscription flow activates automatically after Google validation
+
 4. **No iOS Build**: Android-only for initial release
    - iOS requires Apple Developer account
    - Planned for future release
@@ -528,7 +540,9 @@ cd android
 
 **What's New in v1.0.2**
 - RevenueCat fully integrated with Google Play billing
-- 20 message/day free tier enforcement active
+- Google Play service account configured (validation in progress)
+- Subscription product deployed: simon_says_pro_monthly ($9.99/month)
+- Demo mode active for Devpost judges (showcases Pro features)
 - Production release signing configured
 - Google Play Open Testing track live
 

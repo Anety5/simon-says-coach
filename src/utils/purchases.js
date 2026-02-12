@@ -1,4 +1,11 @@
 // RevenueCat Integration for Simon Says Coach
+// ⚠️⚠️⚠️ CRITICAL REMINDER ⚠️⚠️⚠️
+// REMOVE DEMO CODE FROM checkProStatus() ON FEB 13, 2026 (FRIDAY)
+// See REMOVE_DEMO_CODE.md + SECURITY_URGENT.md for instructions
+// Lines 93-100 need to be deleted to restore production monetization
+// ALSO rotate Gemini API key on same day - see SECURITY_URGENT.md
+// ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+
 import Purchases from 'react-native-purchases';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
@@ -89,6 +96,14 @@ export const initializePurchases = async (userId) => {
 
 // Check if user has Pro subscription
 export const checkProStatus = async () => {
+  // ⚠️ TEMPORARY DEVPOST DEMO MODE ⚠️
+  // TODO: REMOVE THIS AFTER DEVPOST JUDGING (Feb 12, 2026)
+  // Enables Pro for all users while waiting for Google Play service account validation (24-36 hours)
+  console.log('🎯 DEVPOST DEMO MODE: Pro enabled for all users');
+  console.log('⚠️ Remove this override after Devpost submission!');
+  return true;
+  // END TEMPORARY OVERRIDE
+
   try {
     // On web, return false (free tier)
     if (Platform.OS === 'web') {

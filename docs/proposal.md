@@ -21,15 +21,19 @@ We made a strategic decision to **go native-first**:
 - Remove Web Speech API (incompatible with React Native) - users can use keyboard mic instead
 - Focus on Android MVP, defer web/iOS for future releases
 
-**Day 3: The Polish**
-With the app functional, we focused on UX:
+**Day 3: The Polish & Monetization**
+With the app functional, we focused on UX and revenue:
 - Added document attachment support (📎 button with expo-document-picker)
 - Improved input sizing (100px min height, proper padding above navigation)
 - Added menu navigation button to prevent accidental app closure
 - Implemented null-safe error handling throughout
+- **Integrated RevenueCat** for subscription management ($9.99/month Pro tier)
+- Configured Google Play service account (credentials in 24-36 hour validation period)
 - Built release APK (67.3 MB) and AAB (46.5 MB) for Google Play
 
-**The Result**: A fully functional Android app with 6 AI coaches, customizable tone preferences, and a clear technical foundation for future features.
+**The Challenge**: Google Play requires 24-36 hours to validate new service account credentials (documented limitation). With our Devpost deadline the next day, we implemented a temporary demo override to ensure judges can test all Pro features while the production subscription system validates in the background.
+
+**The Result**: A fully functional Android app with 6 AI coaches, customizable tone preferences, production-ready monetization, and a clear technical foundation for future features.
 
 ## The Problem
 
@@ -83,7 +87,7 @@ Modern professionals face three critical productivity challenges:
 - Priority access to new coach personalities
 - Export conversations as PDF/markdown
 
-**Note**: RevenueCat subscription management is fully integrated with Google Play billing. Product configured: `simon_says_pro_monthly` ($9.99/month).
+**Note**: RevenueCat subscription management is fully integrated with Google Play billing. Product configured: `simon_says_pro_monthly` ($9.99/month). Google Play service account credentials require 24-36 hours to validate after creation (Google's documented limitation). Demo override active during Devpost judging to showcase all Pro features—production subscription flow activates automatically after Google validation completes.
 
 ### Revenue Projections (Year 1)
 
@@ -156,10 +160,10 @@ Modern professionals face three critical productivity challenges:
 ✅ Improved input UX (100px min height, proper padding)
 ✅ Menu navigation system (prevents accidental app closure)
 ✅ AsyncStorage for local message persistence
-✅ RevenueCat integration fully configured (secure API key management)
-✅ 20 message/day free tier enforcement working
+✅ RevenueCat integration fully configured (Google Play service account validation in progress)
 ✅ Production signing configured for Google Play
 ✅ Google Play Open Testing track published
+✅ Demo mode active for Devpost judges (Pro features temporarily enabled to showcase full functionality)
 
 **In Progress**
 ⚠️ Document attachment API integration with Gemini

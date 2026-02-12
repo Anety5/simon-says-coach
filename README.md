@@ -3,7 +3,7 @@
 > **AI-powered personal coaching that actually works**  
 > Built for busy professionals who need tactical advice, not generic platitudes.
 
-[![Live on Google Play](https://img.shields.io/badge/Download-Google_Play-414141?style=for-the-badge&logo=google-play)](https://play.google.com)
+[![Live on Google Play](https://img.shields.io/badge/Download-Google_Play-414141?style=for-the-badge&logo=google-play)](https://play.google.com/apps/test/com.anonymous.simonsayscoach/3)
 [![Built with Gemini](https://img.shields.io/badge/Powered_by-Google_Gemini_AI-4285F4?style=for-the-badge&logo=google)](https://ai.google.dev/)
 [![Devpost](https://img.shields.io/badge/Devpost-Submission-003E54?style=for-the-badge&logo=devpost)](https://devpost.com)
 
@@ -65,7 +65,7 @@ Each coach learns your context, adapts to your style, and gives you the tactical
 
 ## 📱 Live Demo
 
-**Download the app:** [Google Play Store](https://play.google.com)  
+**Download the app:** [Google Play Store](https://play.google.com/apps/test/com.anonymous.simonsayscoach/3)  
 _(Currently live with users!)_
 
 **Try it yourself:**
@@ -225,7 +225,7 @@ Built with ❤️ for the Devpost AI Challenge 2026
 
 ## 🔗 Links
 
-- **Live App**: [Google Play Store](https://play.google.com)
+- **Live App**: [Google Play Store](https://play.google.com/apps/test/com.anonymous.simonsayscoach/3)
 - **Devpost**: [View Submission](https://devpost.com)
 - **Documentation**: See `/docs` folder for technical details
 - **Support**: [support.html](public/support.html)
