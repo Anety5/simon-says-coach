@@ -2,7 +2,7 @@
 
 ## About the Creator
 
-**Annette** - Solo Founder & Full-Stack Developer
+**Annet Sumi** - Solo Founder & Full-Stack Developer
 
 I'm an independent software developer passionate about building tools that help people work smarter, not harder. With a background in product design and engineering, I've spent years working with human physiology and function and now exploring how technology can augment human productivity without adding complexity.
 
