@@ -39,6 +39,7 @@ yarn-error.*
 
 # Keystore credentials
 KEYSTORE_CREDENTIALS.txt
+UPLOAD_INSTRUCTIONS.txt
 
 # generated native folders
 /ios
