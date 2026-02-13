@@ -6,6 +6,7 @@
 [![Live on Google Play](https://img.shields.io/badge/Download-Google_Play-414141?style=for-the-badge&logo=google-play)](https://play.google.com/apps/test/com.anonymous.simonsayscoach/3)
 [![Built with Gemini](https://img.shields.io/badge/Powered_by-Google_Gemini_AI-4285F4?style=for-the-badge&logo=google)](https://ai.google.dev/)
 [![Devpost](https://img.shields.io/badge/Devpost-Submission-003E54?style=for-the-badge&logo=devpost)](https://devpost.com)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/anety5/simon-says-coach)
 
 **Built for the [Devpost AI Challenge 2026]**  
 By Lava Rock Labs LLC
@@ -226,6 +227,7 @@ Built with ❤️ for the Devpost AI Challenge 2026
 ## 🔗 Links
 
 - **Live App**: [Google Play Store](https://play.google.com/apps/test/com.anonymous.simonsayscoach/3)
+- **GitHub**: [Source Code](https://github.com/anety5/simon-says-coach)
 - **Devpost**: [View Submission](https://devpost.com)
 - **Documentation**: See `/docs` folder for technical details
 - **Support**: [support.html](public/support.html)
@@ -278,7 +280,9 @@ Built with ❤️ for the Devpost AI Challenge 2026
 
 ## 📄 License
 
-Private project - All rights reserved
+MIT License - see [LICENSE](LICENSE) file for details
+
+© 2026 Lava Rock Labs LLC
 
 ---
 

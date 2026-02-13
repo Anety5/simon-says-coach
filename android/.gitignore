@@ -1,0 +1,21 @@
+# OSX
+#
+.DS_Store
+
+# Android/IntelliJ
+#
+build/
+.idea
+.gradle
+local.properties
+*.iml
+*.hprof
+.cxx/
+
+# Keystore files (SENSITIVE - DO NOT COMMIT)
+keystore.properties
+*.keystore
+*.jks
+
+# Bundle artifacts
+*.jsbundle

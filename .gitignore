@@ -37,6 +37,8 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# Keystore credentials
+KEYSTORE_CREDENTIALS.txt
+
 # generated native folders
 /ios
-/android
